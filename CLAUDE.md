@@ -79,6 +79,15 @@ Core dependencies managed by UV:
 - Example endpoint: `POST /hello` with `{"request": {"name": "value"}}`
 - Web interface available at service root URL
 
+## Git Workflow
+
+When making commits, use combined add && commit commands:
+```bash
+git add file1 file2 && git commit -m "commit message"
+```
+
+For commit attribution, use only: "Generated with Claude"
+
 ## Notes
 
 - UV is installed via official installer (curl method)

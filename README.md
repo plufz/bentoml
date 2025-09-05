@@ -1,210 +1,127 @@
 # BentoML Local Setup (macOS - No Docker) with UV
 
-This repository contains a standard base setup of BentoML configured to run locally on macOS without Docker, using UV for fast Python package management.
+🚀 **Production-ready AI services** running locally on macOS with Apple Silicon optimization and UV package management.
 
-## Quick Start
+## ✨ What This Gives You
 
-1. **Setup Environment**
-   ```bash
-   ./scripts/setup_env.sh
-   ```
+- **🎨 Stable Diffusion Service** - Generate images from text prompts
+- **👁️ LLaVA Vision Service** - Analyze images with structured JSON output  
+- **⚡ Apple Silicon Optimized** - MPS acceleration for M1/M2/M3 Macs
+- **📦 UV Package Management** - Lightning-fast dependency resolution
+- **🔧 Zero Docker Required** - Pure Python with BentoML 1.4+
 
-2. **Check Setup**
-   ```bash
-   ./scripts/check_setup.sh
-   ```
+## 🏃‍♀️ Quick Start
 
-3. **Build Example Service**
-   ```bash
-   ./scripts/run_bentoml.sh build services/example_service.py
-   ```
-
-4. **Run Service**
-   ```bash
-   ./scripts/run_bentoml.sh serve hello_service:latest
-   ```
-
-5. **Test Service**
-   ```bash
-   ./scripts/test_service.sh
-   ```
-
-## Files Overview
-
-| File | Purpose |
-|------|---------|
-| `scripts/setup_env.sh` | Installs UV and sets up Python environment with dependencies |
-| `scripts/run_bentoml.sh` | Script to build and serve BentoML services using UV |
-| `scripts/check_setup.sh` | Verifies setup is working correctly |
-| `scripts/test_service.sh` | Automated testing script |
-| `pyproject.toml` | UV project configuration with dependencies |
-| `bentoml_config.yaml` | BentoML configuration optimized for local development |
-| `.env.example` | Environment variables template |
-| `services/example_service.py` | Simple example service for testing |
-| `services/stable_diffusion_service.py` | Stable Diffusion image generation service |
-| `bentofile_sd.yaml` | Configuration for Stable Diffusion service |
-
-## Usage Examples
-
-### Building a Service
 ```bash
-# Build example service
-./scripts/run_bentoml.sh build services/example_service.py
+# 1. Setup (installs UV + dependencies)
+./scripts/setup_env.sh
 
-# Build Stable Diffusion service
+# 2. Verify setup
+./scripts/check_setup.sh
+
+# 3. Generate your first image
 BENTOFILE=bentofile_sd.yaml ./scripts/run_bentoml.sh build services/stable_diffusion_service.py
-```
-
-### Serving a Service
-```bash
-./scripts/run_bentoml.sh serve hello_service:latest
-```
-
-### Listing Available Services
-```bash
-./scripts/run_bentoml.sh list
-```
-
-### Running Tests
-```bash
-./scripts/test_service.sh test
-./scripts/test_service.sh load 20  # Load test with 20 requests
-```
-
-### Using Stable Diffusion Service
-
-The Stable Diffusion service provides image generation from text prompts:
-
-**API Endpoint**: `POST /generate_image`
-
-**Request Format**:
-```json
-{
-  "request": {
-    "prompt": "a beautiful sunset over mountains",
-    "negative_prompt": "blurry, low quality",
-    "width": 512,
-    "height": 512,
-    "num_inference_steps": 20,
-    "guidance_scale": 7.5,
-    "seed": 42
-  }
-}
-```
-
-**Response**: Returns base64-encoded PNG image along with generation parameters.
-
-**Device Support**: Automatically detects and uses MPS (Apple Silicon), CUDA (NVIDIA), or CPU.
-
-**Testing with curl**:
-```bash
-# Start the service first
 ./scripts/run_bentoml.sh serve stable_diffusion_service:latest
+```
 
-# Test health endpoint
-curl -X POST http://127.0.0.1:3000/health \
-  -H "Content-Type: application/json" \
-  -d '{}'
+Then visit: **http://127.0.0.1:3000/docs** for the interactive API!
 
-# Generate an image
+## 🎯 Available Services
+
+| Service | What it does | Build & Serve |
+|---------|-------------|---------------|
+| **Stable Diffusion** | Text → Image generation | `BENTOFILE=bentofile_sd.yaml ./scripts/run_bentoml.sh build services/stable_diffusion_service.py` |
+| **LLaVA Vision** | Image + Text → JSON analysis | `BENTOFILE=bentofile_llava.yaml ./scripts/run_bentoml.sh build services/llava_service.py` |
+| **Example** | Simple API for testing | `./scripts/run_bentoml.sh build services/example_service.py` |
+
+## 📚 Complete Documentation
+
+**📖 [Full Documentation in `docs/`](docs/README.md)**
+
+### 🚀 Getting Started
+- **[Quick Start Guide](docs/quick-start.md)** - Up and running in 5 minutes
+- **[Installation & Setup](docs/installation.md)** - Detailed installation
+- **[Configuration](docs/configuration.md)** - Customize your setup
+
+### 🤖 AI Services  
+- **[Stable Diffusion Service](docs/stable-diffusion.md)** - Text-to-image generation
+- **[LLaVA Service](docs/llava-service.md)** - Vision-language analysis
+- **[Testing Guide](docs/testing.md)** - Test your services
+
+### 🔧 Advanced
+- **[API Reference](docs/api-reference.md)** - Complete API docs
+- **[Utilities Documentation](docs/utilities.md)** - Reusable components
+- **[Troubleshooting](docs/troubleshooting.md)** - Fix common issues
+
+## 🏗️ Project Structure
+
+```
+bentoml-project/
+├── docs/                 # 📚 Complete documentation
+├── scripts/             # 🛠️ Management scripts  
+│   ├── run_bentoml.sh   # Build & serve services
+│   ├── check_setup.sh   # Verify installation
+│   └── test_llava.sh    # Test LLaVA service
+├── services/            # 🤖 AI services
+│   ├── stable_diffusion_service.py
+│   ├── llava_service.py
+│   └── example_service.py
+├── utils/               # 🔧 Reusable utilities
+│   ├── stable_diffusion/ # SD pipeline utilities
+│   └── llava/           # LLaVA utilities
+└── .claude/             # Claude Code settings
+```
+
+## 🎨 Example Usage
+
+### Generate an Image
+```bash
 curl -X POST http://127.0.0.1:3000/generate_image \
+  -H "Content-Type: application/json" \
+  -d '{"request": {"prompt": "a cute cat in a garden"}}' \
+  | jq -r '.image' | base64 -d > cat.png
+```
+
+### Analyze an Image
+```bash  
+curl -X POST http://127.0.0.1:3000/analyze_image \
   -H "Content-Type: application/json" \
   -d '{
     "request": {
-      "prompt": "a cute cat sitting in a garden",
-      "negative_prompt": "blurry, low quality",
-      "width": 512,
-      "height": 512,
-      "num_inference_steps": 20,
-      "guidance_scale": 7.5,
-      "seed": 42
+      "prompt": "What objects are in this image?",
+      "image": "https://example.com/image.jpg",
+      "json_schema": {
+        "type": "object", 
+        "properties": {
+          "objects": {"type": "array", "items": {"type": "string"}}
+        }
+      }
     }
-  }' | jq '.success, .device_used, .prompt'
-
-# Save generated image (decode base64 to PNG file)
-curl -X POST http://127.0.0.1:3000/generate_image \
-  -H "Content-Type: application/json" \
-  -d '{
-    "request": {
-      "prompt": "a serene lake with mountains at sunset",
-      "width": 512,
-      "height": 512,
-      "num_inference_steps": 15
-    }
-  }' | jq -r '.image' | base64 -d > generated_image.png
+  }'
 ```
 
-**Note**: Image generation takes 10-30 seconds depending on parameters and hardware. The service uses your custom HF_HOME path from `.zprofile` for model storage.
+## ⚡ Key Features
 
-## Configuration
+- **🍎 Apple Silicon Optimized** - Uses MPS backend with float32 for stability
+- **💾 External Drive Support** - Custom HF_HOME for model storage
+- **🔄 Auto Device Detection** - MPS → CUDA → CPU fallback
+- **📊 Structured Output** - JSON schema validation for LLaVA
+- **🧪 Comprehensive Testing** - Dedicated test scripts for all services
+- **📈 Modular Architecture** - Reusable utilities for easy extension
 
-The setup uses UV for dependency management and `bentoml_config.yaml` for BentoML configuration:
+## 🛠️ Requirements
 
-### UV Configuration (`pyproject.toml`)
-- **Dependencies**: BentoML, FastAPI, Pandas, NumPy, Scikit-learn
-- **Dev Dependencies**: pytest, black, isort, ruff, jupyter
-- **Python**: 3.8+ compatible
+- **macOS** (Apple Silicon recommended)
+- **Python 3.8+**  
+- **8GB+ RAM** (16GB for LLaVA)
+- **20GB+ storage** (for AI models)
 
-### BentoML Configuration
-- **Server**: Runs on `127.0.0.1:3000`
-- **Workers**: 1 (suitable for local testing)
-- **Storage**: Local filesystem in `./bentos` and `./models`
-- **Development**: Auto-reload enabled, Swagger UI enabled
+## 🚨 Need Help?
 
-## Environment Variables
+- **Quick Issues**: Check **[Troubleshooting Guide](docs/troubleshooting.md)**
+- **Service Docs**: See **[docs/](docs/README.md)** for complete guides  
+- **Getting Started**: Follow **[Quick Start](docs/quick-start.md)**
 
-Copy `.env.example` to `.env` and customize:
+---
 
-```bash
-cp .env.example .env
-# Edit .env with your preferred settings
-```
-
-## Accessing Your Service
-
-Once running:
-- **API**: http://127.0.0.1:3000
-- **Swagger UI**: http://127.0.0.1:3000/docs
-- **Health Check**: http://127.0.0.1:3000/healthz
-- **Metrics**: http://127.0.0.1:3000/metrics
-
-## UV Commands
-
-Common UV commands for development:
-
-```bash
-uv add <package>        # Add a dependency
-uv add --dev <package>  # Add a dev dependency  
-uv remove <package>     # Remove a dependency
-uv sync                 # Sync environment with lockfile
-uv run <command>        # Run command in UV environment
-uv shell                # Activate UV shell (optional)
-uv lock                 # Update lockfile
-```
-
-## Troubleshooting
-
-### UV Not Found
-```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
-export PATH="$HOME/.cargo/bin:$PATH"
-```
-
-### Port 3000 in Use
-```bash
-lsof -i :3000  # Find what's using the port
-# Kill the process or change port in bentoml_config.yaml
-```
-
-### Missing Dependencies
-```bash
-./scripts/setup_env.sh  # Reinstall dependencies
-./scripts/check_setup.sh  # Verify installation
-```
-
-### Service Won't Start
-```bash
-uv sync  # Sync dependencies
-uv run bentoml list  # Check if service is built
-./scripts/check_setup.sh  # Verify setup
-```
+**Built with** ❤️ **using BentoML, UV, and optimized for Apple Silicon**
