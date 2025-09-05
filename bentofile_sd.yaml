@@ -1,0 +1,9 @@
+service: "services.stable_diffusion_service:StableDiffusionService"
+labels:
+  owner: bentoml-local-setup
+  stage: dev
+  type: image-generation
+include:
+  - "services/"
+python:
+  requirements_txt: "./requirements.txt"

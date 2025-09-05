@@ -84,7 +84,14 @@ build_bento() {
     fi
     
     echo -e "${GREEN}🏗️  Building bento from: ${service_file}${NC}"
-    uv run bentoml build $service_file
+    
+    # Use custom bentofile if BENTOFILE environment variable is set
+    if [ -n "$BENTOFILE" ]; then
+        echo -e "${YELLOW}📋 Using custom bentofile: ${BENTOFILE}${NC}"
+        uv run bentoml build -f $BENTOFILE $service_file
+    else
+        uv run bentoml build $service_file
+    fi
 }
 
 # Function to list bentos

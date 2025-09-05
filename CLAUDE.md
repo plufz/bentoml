@@ -18,6 +18,8 @@ This is a BentoML local development setup configured to run on macOS without Doc
 - `pyproject.toml` - UV project configuration with dependencies  
 - `bentoml_config.yaml` - BentoML server configuration
 - `services/example_service.py` - Example service using modern BentoML API
+- `services/stable_diffusion_service.py` - Stable Diffusion image generation service
+- `bentofile_sd.yaml` - Configuration for Stable Diffusion service
 
 ## Development Workflow
 
@@ -64,6 +66,11 @@ Core dependencies managed by UV:
 - `fastapi>=0.100.0` - API framework
 - `pandas`, `numpy`, `scikit-learn` - Data science libraries
 - `uvicorn[standard]` - ASGI server
+- `diffusers>=0.21.0` - Hugging Face Diffusers for Stable Diffusion
+- `transformers>=4.25.0` - Transformers library
+- `torch>=2.0.0`, `torchvision>=0.15.0` - PyTorch with MPS support
+- `accelerate>=0.20.0` - Model acceleration
+- `pillow>=9.0.0` - Image processing
 
 ## Testing
 

@@ -41,17 +41,23 @@ This repository contains a standard base setup of BentoML configured to run loca
 | `bentoml_config.yaml` | BentoML configuration optimized for local development |
 | `.env.example` | Environment variables template |
 | `services/example_service.py` | Simple example service for testing |
+| `services/stable_diffusion_service.py` | Stable Diffusion image generation service |
+| `bentofile_sd.yaml` | Configuration for Stable Diffusion service |
 
 ## Usage Examples
 
 ### Building a Service
 ```bash
-./scripts/run_bentoml.sh build my_service.py
+# Build example service
+./scripts/run_bentoml.sh build services/example_service.py
+
+# Build Stable Diffusion service
+BENTOFILE=bentofile_sd.yaml ./scripts/run_bentoml.sh build services/stable_diffusion_service.py
 ```
 
 ### Serving a Service
 ```bash
-./scripts/run_bentoml.sh serve my_service:latest
+./scripts/run_bentoml.sh serve hello_service:latest
 ```
 
 ### Listing Available Services
@@ -64,6 +70,71 @@ This repository contains a standard base setup of BentoML configured to run loca
 ./scripts/test_service.sh test
 ./scripts/test_service.sh load 20  # Load test with 20 requests
 ```
+
+### Using Stable Diffusion Service
+
+The Stable Diffusion service provides image generation from text prompts:
+
+**API Endpoint**: `POST /generate_image`
+
+**Request Format**:
+```json
+{
+  "request": {
+    "prompt": "a beautiful sunset over mountains",
+    "negative_prompt": "blurry, low quality",
+    "width": 512,
+    "height": 512,
+    "num_inference_steps": 20,
+    "guidance_scale": 7.5,
+    "seed": 42
+  }
+}
+```
+
+**Response**: Returns base64-encoded PNG image along with generation parameters.
+
+**Device Support**: Automatically detects and uses MPS (Apple Silicon), CUDA (NVIDIA), or CPU.
+
+**Testing with curl**:
+```bash
+# Start the service first
+./scripts/run_bentoml.sh serve stable_diffusion_service:latest
+
+# Test health endpoint
+curl -X POST http://127.0.0.1:3000/health \
+  -H "Content-Type: application/json" \
+  -d '{}'
+
+# Generate an image
+curl -X POST http://127.0.0.1:3000/generate_image \
+  -H "Content-Type: application/json" \
+  -d '{
+    "request": {
+      "prompt": "a cute cat sitting in a garden",
+      "negative_prompt": "blurry, low quality",
+      "width": 512,
+      "height": 512,
+      "num_inference_steps": 20,
+      "guidance_scale": 7.5,
+      "seed": 42
+    }
+  }' | jq '.success, .device_used, .prompt'
+
+# Save generated image (decode base64 to PNG file)
+curl -X POST http://127.0.0.1:3000/generate_image \
+  -H "Content-Type: application/json" \
+  -d '{
+    "request": {
+      "prompt": "a serene lake with mountains at sunset",
+      "width": 512,
+      "height": 512,
+      "num_inference_steps": 15
+    }
+  }' | jq -r '.image' | base64 -d > generated_image.png
+```
+
+**Note**: Image generation takes 10-30 seconds depending on parameters and hardware. The service uses your custom HF_HOME path from `.zprofile` for model storage.
 
 ## Configuration
 
