@@ -19,6 +19,8 @@ This is a BentoML local development setup configured to run on macOS without Doc
 - `bentoml_config.yaml` - BentoML server configuration
 - `services/example_service.py` - Example service using modern BentoML API
 - `services/stable_diffusion_service.py` - Stable Diffusion image generation service
+- `services/llava_service.py` - LLaVA vision-language service using llama-cpp-python
+- `scripts/test_llava.sh` - LLaVA service testing script
 - `bentofile_sd.yaml` - Configuration for Stable Diffusion service
 
 ## Development Workflow
@@ -26,8 +28,41 @@ This is a BentoML local development setup configured to run on macOS without Doc
 1. **Setup**: Run `./scripts/setup_env.sh` to install UV and dependencies
 2. **Verify**: Run `./scripts/check_setup.sh` to confirm setup
 3. **Build**: Use `./scripts/run_bentoml.sh build <service.py>` to build services
-4. **Serve**: Use `./scripts/run_bentoml.sh serve <service:tag>` to run services
-5. **Test**: Use `./scripts/test_service.sh` for automated testing
+4. **Serve**: Use `./scripts/run_bentoml.sh serve <module.service:ServiceClass>` to run services
+5. **Test**: Use service-specific test scripts for automated testing
+
+### Running Services
+
+Services are served using the module path format:
+```bash
+# Stable Diffusion service
+./scripts/run_bentoml.sh serve services.stable_diffusion_service:StableDiffusionService
+
+# LLaVA service  
+./scripts/run_bentoml.sh serve services.llava_service:LLaVAService
+
+# Example service
+./scripts/run_bentoml.sh serve services.example_service:ExampleService
+```
+
+### Building Services
+
+Build services into Bento packages:
+```bash
+# Build with default bentofile
+./scripts/run_bentoml.sh build services/service_name.py
+
+# Build with custom bentofile
+BENTOFILE=bentofile_custom.yaml ./scripts/run_bentoml.sh build services/service_name.py
+```
+
+### Testing Services
+
+Each service has its own test script:
+```bash
+./scripts/test_llava.sh        # Test LLaVA service
+./scripts/test_service.sh      # Test general services
+```
 
 ## BentoML Service Pattern
 
@@ -58,12 +93,13 @@ Services expect nested JSON payloads:
 - **Server**: Runs on `127.0.0.1:3000` by default
 - **Storage**: Uses local filesystem (`./bentos`, `./models`)
 - **Development**: Auto-reload enabled, web interface at root `/`
+- **HuggingFace Cache**: Custom location at `/Volumes/Second/huggingface` (not default `~/.cache/huggingface`)
 
 ## Dependencies
 
 Core dependencies managed by UV:
 - `bentoml[io]>=1.2.0` - Main framework
-- `fastapi>=0.100.0` - API framework
+- `fastapi>=0.100.0` - API framework  
 - `pandas`, `numpy`, `scikit-learn` - Data science libraries
 - `uvicorn[standard]` - ASGI server
 - `diffusers>=0.21.0` - Hugging Face Diffusers for Stable Diffusion
@@ -71,6 +107,9 @@ Core dependencies managed by UV:
 - `torch>=2.0.0`, `torchvision>=0.15.0` - PyTorch with MPS support
 - `accelerate>=0.20.0` - Model acceleration
 - `pillow>=9.0.0` - Image processing
+- `llama-cpp-python>=0.2.0` - Fast GGUF model inference for LLaVA
+- `pydantic>=2.0.0` - Data validation
+- `jsonschema>=4.0.0` - JSON schema validation
 
 ## Testing
 

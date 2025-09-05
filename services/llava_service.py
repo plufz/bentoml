@@ -1,5 +1,5 @@
 """
-LLaVA Vision-Language Service
+LLaVA Vision-Language Service using llama-cpp-python
 This service takes an image, text prompt, and optional JSON schema to generate structured responses
 """
 
@@ -9,10 +9,10 @@ from typing import Dict, Any, Optional, Union
 from PIL import Image
 
 from utils.llava import (
-    LLaVAPipelineManager,
     validate_json_schema,
     validate_image_format
 )
+from utils.llava.llamacpp_pipeline_manager import LLaVALlamaCppPipelineManager
 
 
 class VisionLanguageRequest(BaseModel):
@@ -25,36 +25,18 @@ class VisionLanguageRequest(BaseModel):
 
 
 @bentoml.service(
-    resources={"gpu": 1, "memory": "16Gi"},
-    traffic={"timeout": 300}
+    resources={"memory": "4Gi"},
+    traffic={"timeout": 120}
 )
 class LLaVAService:
-    """LLaVA vision-language service for image understanding and structured output generation"""
+    """LLaVA vision-language service using llama-cpp-python for faster GGUF model inference"""
     
     def __init__(self):
-        # Check if user's downloaded model exists, otherwise use default
-        user_model = "llava-1.6-mistral-7b"  # User's downloaded model
-        default_model = "llava-hf/llava-v1.6-mistral-7b-hf"  # Fallback
-        
-        # Try user's model first, fallback to HF model
-        try:
-            # Attempt to load user's model
-            self.pipeline_manager = LLaVAPipelineManager(
-                model_id=user_model,
-                use_pipeline=True,  # Use pipeline for simpler integration
-                max_new_tokens=512,
-                temperature=0.1,
-            )
-        except Exception as e:
-            print(f"Failed to load user model '{user_model}': {e}")
-            print(f"Falling back to HuggingFace model: {default_model}")
-            # Fallback to HF model
-            self.pipeline_manager = LLaVAPipelineManager(
-                model_id=default_model,
-                use_pipeline=True,
-                max_new_tokens=512,
-                temperature=0.1,
-            )
+        # Initialize the llama-cpp pipeline manager
+        self.pipeline_manager = LLaVALlamaCppPipelineManager(
+            max_new_tokens=512,
+            temperature=0.1,
+        )
         
         # Store device info for API responses
         self.device = self.pipeline_manager.device
