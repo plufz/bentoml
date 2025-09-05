@@ -78,3 +78,6 @@ htmlcov/
 
 # Lock files (UV manages these)
 uv.lock
+
+# Claude Code local settings
+.claude/settings.local.json
