@@ -6,63 +6,63 @@ This repository contains a standard base setup of BentoML configured to run loca
 
 1. **Setup Environment**
    ```bash
-   ./setup_env.sh
+   ./scripts/setup_env.sh
    ```
 
 2. **Check Setup**
    ```bash
-   ./check_setup.sh
+   ./scripts/check_setup.sh
    ```
 
 3. **Build Example Service**
    ```bash
-   ./run_bentoml.sh build example_service.py
+   ./scripts/run_bentoml.sh build example_service.py
    ```
 
 4. **Run Service**
    ```bash
-   ./run_bentoml.sh serve hello_service:latest
+   ./scripts/run_bentoml.sh serve hello_service:latest
    ```
 
 5. **Test Service**
    ```bash
-   ./test_service.sh
+   ./scripts/test_service.sh
    ```
 
 ## Files Overview
 
 | File | Purpose |
 |------|---------|
-| `setup_env.sh` | Installs UV and sets up Python environment with dependencies |
+| `scripts/setup_env.sh` | Installs UV and sets up Python environment with dependencies |
+| `scripts/run_bentoml.sh` | Script to build and serve BentoML services using UV |
+| `scripts/check_setup.sh` | Verifies setup is working correctly |
+| `scripts/test_service.sh` | Automated testing script |
 | `pyproject.toml` | UV project configuration with dependencies |
 | `bentoml_config.yaml` | BentoML configuration optimized for local development |
-| `run_bentoml.sh` | Script to build and serve BentoML services using UV |
 | `.env.example` | Environment variables template |
-| `check_setup.sh` | Verifies setup is working correctly |
 | `example_service.py` | Simple example service for testing |
-| `test_service.sh` | Automated testing script |
 
 ## Usage Examples
 
 ### Building a Service
 ```bash
-./run_bentoml.sh build my_service.py
+./scripts/run_bentoml.sh build my_service.py
 ```
 
 ### Serving a Service
 ```bash
-./run_bentoml.sh serve my_service:latest
+./scripts/run_bentoml.sh serve my_service:latest
 ```
 
 ### Listing Available Services
 ```bash
-./run_bentoml.sh list
+./scripts/run_bentoml.sh list
 ```
 
 ### Running Tests
 ```bash
-./test_service.sh test
-./test_service.sh load 20  # Load test with 20 requests
+./scripts/test_service.sh test
+./scripts/test_service.sh load 20  # Load test with 20 requests
 ```
 
 ## Configuration
@@ -127,13 +127,13 @@ lsof -i :3000  # Find what's using the port
 
 ### Missing Dependencies
 ```bash
-./setup_env.sh  # Reinstall dependencies
-./check_setup.sh  # Verify installation
+./scripts/setup_env.sh  # Reinstall dependencies
+./scripts/check_setup.sh  # Verify installation
 ```
 
 ### Service Won't Start
 ```bash
 uv sync  # Sync dependencies
 uv run bentoml list  # Check if service is built
-./check_setup.sh  # Verify setup
+./scripts/check_setup.sh  # Verify setup
 ```

@@ -11,21 +11,21 @@ This is a BentoML local development setup configured to run on macOS without Doc
 
 ## Key Files
 
-- `setup_env.sh` - Installs UV and sets up environment
+- `scripts/setup_env.sh` - Installs UV and sets up environment
+- `scripts/run_bentoml.sh` - Script to build/serve BentoML services
+- `scripts/check_setup.sh` - Verifies installation and configuration
+- `scripts/test_service.sh` - Automated testing script
 - `pyproject.toml` - UV project configuration with dependencies  
 - `bentoml_config.yaml` - BentoML server configuration
-- `run_bentoml.sh` - Script to build/serve BentoML services
-- `check_setup.sh` - Verifies installation and configuration
-- `test_service.sh` - Automated testing script
 - `example_service.py` - Example service using modern BentoML API
 
 ## Development Workflow
 
-1. **Setup**: Run `./setup_env.sh` to install UV and dependencies
-2. **Verify**: Run `./check_setup.sh` to confirm setup
-3. **Build**: Use `./run_bentoml.sh build <service.py>` to build services
-4. **Serve**: Use `./run_bentoml.sh serve <service:tag>` to run services
-5. **Test**: Use `./test_service.sh` for automated testing
+1. **Setup**: Run `./scripts/setup_env.sh` to install UV and dependencies
+2. **Verify**: Run `./scripts/check_setup.sh` to confirm setup
+3. **Build**: Use `./scripts/run_bentoml.sh build <service.py>` to build services
+4. **Serve**: Use `./scripts/run_bentoml.sh serve <service:tag>` to run services
+5. **Test**: Use `./scripts/test_service.sh` for automated testing
 
 ## BentoML Service Pattern
 
