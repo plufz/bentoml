@@ -4,8 +4,7 @@
     "Bash(./scripts/run_bentoml.sh*)",
     "Bash(./scripts/check_setup.sh*)",
     "Bash(./scripts/test_service.sh*)",
-    "Bash(./scripts/test_llava.sh*)",
-    "Bash()"
+    "Bash(./scripts/test_llava.sh*)"
     ]
 }
 }
