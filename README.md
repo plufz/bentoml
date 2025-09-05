@@ -16,7 +16,7 @@ This repository contains a standard base setup of BentoML configured to run loca
 
 3. **Build Example Service**
    ```bash
-   ./scripts/run_bentoml.sh build example_service.py
+   ./scripts/run_bentoml.sh build services/example_service.py
    ```
 
 4. **Run Service**
@@ -40,7 +40,7 @@ This repository contains a standard base setup of BentoML configured to run loca
 | `pyproject.toml` | UV project configuration with dependencies |
 | `bentoml_config.yaml` | BentoML configuration optimized for local development |
 | `.env.example` | Environment variables template |
-| `example_service.py` | Simple example service for testing |
+| `services/example_service.py` | Simple example service for testing |
 
 ## Usage Examples
 

@@ -17,7 +17,7 @@ This is a BentoML local development setup configured to run on macOS without Doc
 - `scripts/test_service.sh` - Automated testing script
 - `pyproject.toml` - UV project configuration with dependencies  
 - `bentoml_config.yaml` - BentoML server configuration
-- `example_service.py` - Example service using modern BentoML API
+- `services/example_service.py` - Example service using modern BentoML API
 
 ## Development Workflow
 

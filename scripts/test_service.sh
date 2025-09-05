@@ -134,7 +134,7 @@ run_tests() {
         # Build example service if needed
         if ! uv run bentoml list | grep -q "hello_service"; then
             echo -e "${YELLOW}🏗️  Building example service...${NC}"
-            uv run bentoml build example_service.py
+            uv run bentoml build services/example_service.py
         fi
         
         # Start server in background

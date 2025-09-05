@@ -1,8 +1,8 @@
-service: "example_service:HelloService"
+service: "services.example_service:HelloService"
 labels:
   owner: bentoml-local-setup
   stage: dev
 include:
-  - "example_service.py"
+  - "services/"
 python:
   requirements_txt: "./requirements.txt"
