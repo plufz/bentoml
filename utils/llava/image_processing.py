@@ -30,8 +30,20 @@ def validate_image_format(image: Union[str, bytes, Image.Image]) -> bool:
                 return True
             elif image.startswith(('http://', 'https://')):
                 # URL - try to fetch and validate
-                response = requests.head(image, timeout=5)
-                return response.headers.get('content-type', '').startswith('image/')
+                headers = {'User-Agent': 'Mozilla/5.0 (compatible; LLaVA-Service/1.0)'}
+                try:
+                    response = requests.head(image, timeout=5, headers=headers)
+                    if response.headers.get('content-type', '').startswith('image/'):
+                        return True
+                    # If HEAD doesn't give us content-type, try a quick GET to verify it's an image
+                    response = requests.get(image, timeout=10, stream=True, headers=headers)
+                    response.raise_for_status()
+                    # Try to open first few bytes as image to validate
+                    chunk = next(response.iter_content(1024))
+                    Image.open(io.BytesIO(chunk))
+                    return True
+                except Exception:
+                    return False
             else:
                 # Try to decode as base64
                 try:
@@ -75,7 +87,8 @@ def process_image_input(image: Union[str, bytes, Image.Image]) -> Image.Image:
             
             elif image.startswith(('http://', 'https://')):
                 # URL - fetch the image
-                response = requests.get(image, timeout=10)
+                headers = {'User-Agent': 'Mozilla/5.0 (compatible; LLaVA-Service/1.0)'}
+                response = requests.get(image, timeout=10, headers=headers)
                 response.raise_for_status()
                 img = Image.open(io.BytesIO(response.content))
             

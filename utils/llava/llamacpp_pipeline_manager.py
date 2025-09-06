@@ -95,12 +95,32 @@ class LLaVALlamaCppPipelineManager:
     def _get_default_model_paths(self) -> tuple[str, str]:
         """Get default model paths from HuggingFace cache using HF_HOME environment variable."""
         import os
+        import glob
         
         # Use HF_HOME environment variable, fallback to default if not set
         HUGGINGFACE_PATH = os.getenv('HF_HOME', str(pathlib.Path.home()) + "/.cache/huggingface")
         
-        clip_model_path = HUGGINGFACE_PATH + "/hub/models--cjpais--llava-1.6-mistral-7b-gguf/snapshots/6019df415777605a8364e2668aa08b7e354bf0ba/mmproj-model-f16.gguf"
-        model_path = HUGGINGFACE_PATH + "/hub/models--cjpais--llava-1.6-mistral-7b-gguf/snapshots/6019df415777605a8364e2668aa08b7e354bf0ba/llava-v1.6-mistral-7b.Q5_K_M.gguf"
+        # Look for the model directory pattern
+        model_dir_pattern = f"{HUGGINGFACE_PATH}/hub/models--cjpais--llava-1.6-mistral-7b-gguf/snapshots/*"
+        model_dirs = glob.glob(model_dir_pattern)
+        
+        if not model_dirs:
+            raise FileNotFoundError(
+                f"LLaVA GGUF model not found in {HUGGINGFACE_PATH}. "
+                "Please download the model first or provide explicit model paths."
+            )
+        
+        # Use the first (most recent) snapshot
+        snapshot_dir = model_dirs[0]
+        
+        clip_model_path = f"{snapshot_dir}/mmproj-model-f16.gguf"
+        model_path = f"{snapshot_dir}/llava-v1.6-mistral-7b.Q5_K_M.gguf"
+        
+        # Verify both files exist
+        if not os.path.exists(clip_model_path):
+            raise FileNotFoundError(f"CLIP model not found: {clip_model_path}")
+        if not os.path.exists(model_path):
+            raise FileNotFoundError(f"LLaVA model not found: {model_path}")
         
         return model_path, clip_model_path
     

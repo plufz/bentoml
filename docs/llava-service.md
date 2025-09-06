@@ -37,7 +37,7 @@ BENTOFILE=bentofile_llava.yaml ./scripts/run_bentoml.sh build services/llava_ser
 {
   "request": {
     "prompt": "What objects do you see in this image?",
-    "image": "data:image/png;base64,iVBORw0KGgo..." or "https://example.com/image.jpg",
+    "image": "data:image/jpeg;base64,/9j/4AAQ..." or "https://httpbin.org/image/jpeg",
     "json_schema": {
       "type": "object",
       "properties": {
@@ -63,9 +63,9 @@ BENTOFILE=bentofile_llava.yaml ./scripts/run_bentoml.sh build services/llava_ser
 - `max_new_tokens` (optional): Maximum response length (1-2048, default: 512)
 
 **Image Input Formats**:
-- **Base64 with header**: `"data:image/png;base64,iVBORw0KGgo..."`
-- **Base64 only**: `"iVBORw0KGgo..."`
-- **URL**: `"https://example.com/image.jpg"`
+- **Base64 with header**: `"data:image/png;base64,iVBORw0KGgo..."` or `"data:image/jpeg;base64,/9j/4AAQ..."`
+- **Base64 only**: `"iVBORw0KGgo..."` (PNG) or `"/9j/4AAQ..."` (JPEG)
+- **URL**: `"https://httpbin.org/image/jpeg"` (JPEG) or `"https://httpbin.org/image/png"` (PNG)
 - **Bytes**: Raw image bytes (programmatic use)
 
 **Response with JSON Schema**:
@@ -115,7 +115,7 @@ curl -X POST http://127.0.0.1:3000/analyze_image \
   -d '{
     "request": {
       "prompt": "Describe this image",
-      "image": "https://example.com/your-image.jpg"
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Vd-Orig.png/256px-Vd-Orig.png"
     }
   }' | jq '.response'
 ```
@@ -127,7 +127,7 @@ curl -X POST http://127.0.0.1:3000/analyze_image \
   -d '{
     "request": {
       "prompt": "What objects are in this image?",
-      "image": "https://example.com/your-image.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Vd-Orig.png/256px-Vd-Orig.png",
       "json_schema": {
         "type": "object",
         "properties": {
@@ -148,7 +148,7 @@ curl -X POST http://127.0.0.1:3000/analyze_image \
   -d '{
     "request": {
       "prompt": "Is there a person in this image? What are they doing?",
-      "image": "https://example.com/your-image.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Vd-Orig.png/256px-Vd-Orig.png",
       "json_schema": {
         "type": "object",
         "properties": {
@@ -159,6 +159,18 @@ curl -X POST http://127.0.0.1:3000/analyze_image \
       }
     }
   }'
+```
+
+### JPEG Image Analysis
+```bash
+curl -X POST http://127.0.0.1:3000/analyze_image \
+  -H "Content-Type: application/json" \
+  -d '{
+    "request": {
+      "prompt": "Describe what you see in this image",
+      "image": "https://httpbin.org/image/jpeg"
+    }
+  }' | jq '.response'
 ```
 
 ### Using Test Script
@@ -199,7 +211,7 @@ Analyze images for policy compliance or content categorization.
 - **Analysis Time**: 10-30 seconds depending on image size and complexity
 - **Memory Usage**: ~16GB recommended for optimal performance
 - **Image Size**: Automatically resized to max 1344px while maintaining aspect ratio
-- **Supported Formats**: JPEG, PNG, GIF, BMP, WebP
+- **Supported Formats**: JPEG, PNG, GIF, BMP, WebP (all common image formats via PIL)
 
 ## Configuration
 

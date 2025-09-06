@@ -166,6 +166,88 @@ test_json_output() {
     echo "$body" | jq '.success, .format, .response'
 }
 
+# Function to test image analysis with URL input
+test_image_url() {
+    echo -e "${YELLOW}Testing image analysis with URL input...${NC}"
+    
+    # Use a publicly accessible test image URL (Wikimedia Commons)
+    TEST_IMAGE_URL="https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Vd-Orig.png/256px-Vd-Orig.png"
+    
+    response=$(curl -s -w "%{http_code}" -X POST "$SERVER_URL/analyze_image" \
+        -H "Content-Type: application/json" \
+        -d '{
+            "request": {
+                "prompt": "Describe what you see in this image. What objects, colors, and details can you identify?",
+                "image": "'$TEST_IMAGE_URL'",
+                "include_raw_response": true
+            }
+        }')
+    
+    http_code="${response: -3}"
+    body="${response%???}"
+    
+    if [[ "$http_code" -ne 200 ]]; then
+        echo -e "${RED}❌ URL image test failed with HTTP $http_code${NC}"
+        echo "$body" | jq '.' 2>/dev/null || echo "$body"
+        return 1
+    fi
+    
+    success=$(echo "$body" | jq -r '.success')
+    if [[ "$success" != "true" ]]; then
+        echo -e "${RED}❌ URL image test returned success: $success${NC}"
+        error=$(echo "$body" | jq -r '.error // "Unknown error"')
+        echo -e "${RED}Error: $error${NC}"
+        echo "$body" | jq '.'
+        return 1
+    fi
+    
+    echo -e "${GREEN}✅ URL image test passed${NC}"
+    echo "$body" | jq '.success, .format, .device_used'
+    echo -e "${BLUE}Response content:${NC}"
+    echo "$body" | jq '.response'
+}
+
+# Function to test JPEG image analysis
+test_jpeg_url() {
+    echo -e "${YELLOW}Testing JPEG image analysis...${NC}"
+    
+    # Use httpbin.org JPEG test image
+    TEST_JPEG_URL="https://httpbin.org/image/jpeg"
+    
+    response=$(curl -s -w "%{http_code}" -X POST "$SERVER_URL/analyze_image" \
+        -H "Content-Type: application/json" \
+        -d '{
+            "request": {
+                "prompt": "Describe this JPEG image in detail. What animals or objects do you see?",
+                "image": "'$TEST_JPEG_URL'",
+                "include_raw_response": true
+            }
+        }')
+    
+    http_code="${response: -3}"
+    body="${response%???}"
+    
+    if [[ "$http_code" -ne 200 ]]; then
+        echo -e "${RED}❌ JPEG test failed with HTTP $http_code${NC}"
+        echo "$body" | jq '.' 2>/dev/null || echo "$body"
+        return 1
+    fi
+    
+    success=$(echo "$body" | jq -r '.success')
+    if [[ "$success" != "true" ]]; then
+        echo -e "${RED}❌ JPEG test returned success: $success${NC}"
+        error=$(echo "$body" | jq -r '.error // "Unknown error"')
+        echo -e "${RED}Error: $error${NC}"
+        echo "$body" | jq '.'
+        return 1
+    fi
+    
+    echo -e "${GREEN}✅ JPEG test passed${NC}"
+    echo "$body" | jq '.success, .format, .device_used'
+    echo -e "${BLUE}Response content:${NC}"
+    echo "$body" | jq '.response'
+}
+
 # Main execution
 test_failures=0
 
@@ -182,6 +264,12 @@ case "${1:-all}" in
     "json")
         test_json_output || test_failures=$((test_failures + 1))
         ;;
+    "url")
+        test_image_url || test_failures=$((test_failures + 1))
+        ;;
+    "jpeg")
+        test_jpeg_url || test_failures=$((test_failures + 1))
+        ;;
     "all"|*)
         echo -e "${BLUE}Running all tests...${NC}\n"
         test_health || test_failures=$((test_failures + 1))
@@ -191,6 +279,10 @@ case "${1:-all}" in
         test_image_analysis || test_failures=$((test_failures + 1))
         echo
         test_json_output || test_failures=$((test_failures + 1))
+        echo
+        test_image_url || test_failures=$((test_failures + 1))
+        echo
+        test_jpeg_url || test_failures=$((test_failures + 1))
         ;;
 esac
 

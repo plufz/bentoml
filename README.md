@@ -82,14 +82,14 @@ curl -X POST http://127.0.0.1:3000/generate_image \
   | jq -r '.image' | base64 -d > cat.png
 ```
 
-### Analyze an Image
+### Analyze an Image (PNG)
 ```bash  
 curl -X POST http://127.0.0.1:3000/analyze_image \
   -H "Content-Type: application/json" \
   -d '{
     "request": {
       "prompt": "What objects are in this image?",
-      "image": "https://example.com/image.jpg",
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Vd-Orig.png/256px-Vd-Orig.png",
       "json_schema": {
         "type": "object", 
         "properties": {
@@ -98,6 +98,18 @@ curl -X POST http://127.0.0.1:3000/analyze_image \
       }
     }
   }'
+```
+
+### Analyze a JPEG Image
+```bash
+curl -X POST http://127.0.0.1:3000/analyze_image \
+  -H "Content-Type: application/json" \
+  -d '{
+    "request": {
+      "prompt": "Describe what you see in this image",
+      "image": "https://httpbin.org/image/jpeg"
+    }
+  }' | jq '.response'
 ```
 
 ## ⚡ Key Features
