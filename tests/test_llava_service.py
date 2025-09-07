@@ -310,10 +310,12 @@ class TestLLaVAServiceIntegration:
             base64_image = base64.b64encode(image_data).decode()
         
         payload = {
-            "prompt": "What do you see in this image?",
-            "image": f"data:image/jpeg;base64,{base64_image}",
-            "max_new_tokens": 100,
-            "temperature": 0.1
+            "request": {
+                "prompt": "What do you see in this image?",
+                "image": f"data:image/jpeg;base64,{base64_image}",
+                "max_new_tokens": 100,
+                "temperature": 0.1
+            }
         }
         
         response = requests.post(

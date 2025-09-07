@@ -275,7 +275,7 @@ class TestMultiServiceIntegration:
     @pytest.mark.slow
     def test_hello_endpoint_integration(self, running_multi_service: str):
         """Test hello endpoint through multi-service"""
-        payload = {"name": "MultiService Test"}
+        payload = {"request": {"name": "MultiService Test"}}
         response = requests.post(f"{running_multi_service}/hello", json=payload)
         
         assert response.status_code == 200

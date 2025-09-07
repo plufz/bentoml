@@ -257,7 +257,9 @@ class TestWhisperServiceIntegration:
         # Note: This would need a real audio URL to test properly
         # For safety, we'll test with an invalid URL to check error handling
         payload = {
-            "url": "https://httpbin.org/status/404"
+            "request": {
+                "url": "https://httpbin.org/status/404"
+            }
         }
         
         response = requests.post(

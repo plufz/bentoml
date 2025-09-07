@@ -46,17 +46,17 @@ class TestStableDiffusionServiceUnit:
         request = ImageGenerationRequest(
             prompt="A cat in space",
             negative_prompt="blurry, low quality",
-            width=768,
-            height=768,
-            num_inference_steps=30,
+            width=256,
+            height=256,
+            num_inference_steps=10,
             guidance_scale=10.0,
             seed=42
         )
         assert request.prompt == "A cat in space"
         assert request.negative_prompt == "blurry, low quality"
-        assert request.width == 768
-        assert request.height == 768
-        assert request.num_inference_steps == 30
+        assert request.width == 256
+        assert request.height == 256
+        assert request.num_inference_steps == 10
         assert request.guidance_scale == 10.0
         assert request.seed == 42
     
@@ -222,12 +222,14 @@ class TestStableDiffusionServiceIntegration:
     def test_generate_image_integration(self, running_sd_service: str):
         """Test image generation with actual service"""
         payload = {
-            "prompt": "A simple red circle on white background",
-            "width": 256,  # Small size for faster generation
-            "height": 256,
-            "num_inference_steps": 10,  # Fewer steps for faster generation
-            "guidance_scale": 5.0,
-            "seed": 42
+            "request": {
+                "prompt": "A simple red circle on white background",
+                "width": 256,  # Small size for faster generation
+                "height": 256,
+                "num_inference_steps": 5,  # Fewer steps for faster generation
+                "guidance_scale": 5.0,
+                "seed": 42
+            }
         }
         
         response = requests.post(
@@ -269,8 +271,8 @@ class TestStableDiffusionServiceBehavior:
             "generation_info": {
                 "prompt": "A beautiful sunset",
                 "negative_prompt": "",
-                "width": 512,
-                "height": 512,
+                "width": 256,
+                "height": 256,
                 "seed": 123456,
                 "guidance_scale": 7.5,
                 "num_inference_steps": 20
