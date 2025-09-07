@@ -40,6 +40,7 @@ show_usage() {
     echo "  $0 analyze_image '{\"image\": \"base64...\", \"prompt\": \"What is in this image?\"}'"
     echo "  $0 analyze_image_url '{\"image_url\": \"https://plufz.com/test-assets/test-office.jpg\", \"prompt\": \"What is in this image?\"}'"
     echo "  $0 transcribe_url '{\"url\": \"https://plufz.com/test-assets/test-english.mp3\"}'"
+    echo "  $0 upscale_url '{\"url\": \"https://plufz.com/test-assets/test-office.jpg\", \"scale_factor\": 2.0}'"
     echo ""
     echo "Options:"
     echo "  --host <host>     Server host (default: ${DEFAULT_HOST})"
@@ -66,6 +67,94 @@ show_usage() {
     echo "  Whisper Audio:"
     echo "    transcribe_file - Transcribe uploaded audio file"
     echo "    transcribe_url  - Transcribe audio from URL"
+    echo ""
+    echo "  Photo Upscaler:"
+    echo "    upscale_file    - Upscale uploaded image file"
+    echo "    upscale_url     - Upscale image from URL"
+    echo ""
+    echo "Note: Image endpoints (generate_image, upscale_*) automatically extract"
+    echo "      base64 image data and save to endpoint_images/ directory."
+}
+
+# Function to process image responses - extract base64 and save as files
+process_image_response() {
+    local response="$1"
+    local endpoint="$2"
+    
+    echo -e "${YELLOW}📸 Processing image response...${NC}"
+    
+    # Create output directory
+    if ! mkdir -p endpoint_images 2>/dev/null; then
+        echo -e "${RED}❌ Failed to create endpoint_images directory${NC}"
+        echo -e "${YELLOW}Response (without image processing):${NC}"
+        echo "$response" | python3 -m json.tool
+        return
+    fi
+    
+    # Use Python to extract base64 image and save file
+    # Write response to temporary file to avoid shell escaping issues
+    local temp_response_file=$(mktemp)
+    echo "$response" > "$temp_response_file"
+    
+    python3 << EOF
+import json
+import base64
+import sys
+from datetime import datetime
+import os
+
+try:
+    with open('$temp_response_file', 'r') as f:
+        response = json.load(f)
+    
+    # Extract base64 image data based on response structure
+    image_base64 = None
+    image_format = 'PNG'  # default
+    
+    if 'image_base64' in response:
+        image_base64 = response['image_base64']
+        # Get format from response if available
+        if 'upscaling_info' in response and 'output_format' in response['upscaling_info']:
+            image_format = response['upscaling_info']['output_format']
+        elif 'generation_info' in response and 'output_format' in response['generation_info']:
+            image_format = response['generation_info']['output_format']
+    
+    if image_base64:
+        # Generate filename with timestamp
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        extension = image_format.lower()
+        if extension == 'jpeg':
+            extension = 'jpg'
+        
+        filename = f'endpoint_images/$endpoint_{timestamp}.{extension}'
+        
+        # Decode and save image
+        image_data = base64.b64decode(image_base64)
+        with open(filename, 'wb') as f:
+            f.write(image_data)
+        
+        # Modify response to remove base64 data
+        response['image_base64'] = f'<base64 image data extracted to {filename}>'
+        
+        # Pretty print the modified response
+        print(json.dumps(response, indent=2))
+        print(f'\n🎉 Image saved to: {filename}')
+        print(f'📊 Image size: {len(image_data)} bytes')
+    else:
+        # No image data found, just print the response
+        print(json.dumps(response, indent=2))
+        print('\n⚠️  No base64 image data found in response')
+        
+except json.JSONDecodeError:
+    print('Error: Invalid JSON response', file=sys.stderr)
+    sys.exit(1)
+except Exception as e:
+    print(f'Error processing image: {e}', file=sys.stderr)
+    sys.exit(1)
+EOF
+
+    # Clean up temp file
+    rm -f "$temp_response_file"
 }
 
 # Parse command line arguments
@@ -190,8 +279,24 @@ if [[ $CURL_EXIT_CODE -eq 0 ]]; then
     
     # Try to format JSON response
     if echo "$RESPONSE" | python3 -m json.tool >/dev/null 2>&1; then
-        echo -e "${YELLOW}Response:${NC}"
-        echo "$RESPONSE" | python3 -m json.tool
+        # Check if this is an image-generating endpoint
+        IMAGE_ENDPOINTS="generate_image upscale_file upscale_url"
+        IS_IMAGE_ENDPOINT=false
+        
+        for img_endpoint in $IMAGE_ENDPOINTS; do
+            if [[ "$ENDPOINT" == "$img_endpoint" ]]; then
+                IS_IMAGE_ENDPOINT=true
+                break
+            fi
+        done
+        
+        if [[ "$IS_IMAGE_ENDPOINT" == true ]]; then
+            # Handle image response - extract base64 and save as file
+            process_image_response "$RESPONSE" "$ENDPOINT"
+        else
+            echo -e "${YELLOW}Response:${NC}"
+            echo "$RESPONSE" | python3 -m json.tool
+        fi
     else
         echo -e "${YELLOW}Response (raw):${NC}"
         echo "$RESPONSE"
