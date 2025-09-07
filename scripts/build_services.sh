@@ -16,6 +16,9 @@ BENTOFILE=config/bentofiles/whisper.yaml ./scripts/run_bentoml.sh build services
 echo "Building Photo Upscaler Service..."
 BENTOFILE=config/bentofiles/upscaler.yaml ./scripts/run_bentoml.sh build services/upscaler_service.py
 
+echo "Building RAG Service..."
+BENTOFILE=config/bentofiles/rag.yaml ./scripts/run_bentoml.sh build services/rag_service.py
+
 echo "Building Multi-Service (unified deployment)..."
 BENTOFILE=config/bentofiles/multi-service.yaml ./scripts/run_bentoml.sh build services/multi_service.py
 
