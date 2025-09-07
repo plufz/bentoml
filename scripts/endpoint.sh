@@ -16,10 +16,16 @@ BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# Default configuration
-DEFAULT_HOST="127.0.0.1"
-DEFAULT_PORT="3000"
-BASE_URL="http://${DEFAULT_HOST}:${DEFAULT_PORT}"
+# Source .env file if it exists
+if [ -f .env ]; then
+    source .env
+fi
+
+# Default configuration from environment or fallback defaults
+DEFAULT_HOST="${BENTOML_HOST:-127.0.0.1}"
+DEFAULT_PORT="${BENTOML_PORT:-3000}"
+DEFAULT_PROTOCOL="${BENTOML_PROTOCOL:-http}"
+BASE_URL="${DEFAULT_PROTOCOL}://${DEFAULT_HOST}:${DEFAULT_PORT}"
 
 # Function to show usage
 show_usage() {
@@ -120,8 +126,8 @@ if [[ -z "$PAYLOAD" ]]; then
     exit 1
 fi
 
-# Update base URL with provided host/port
-BASE_URL="http://${HOST}:${PORT}"
+# Update base URL with provided host/port  
+BASE_URL="${DEFAULT_PROTOCOL}://${HOST}:${PORT}"
 
 # Validate JSON payload
 if ! echo "$PAYLOAD" | python3 -m json.tool >/dev/null 2>&1; then

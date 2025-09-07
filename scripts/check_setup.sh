@@ -103,13 +103,19 @@ else
     echo -e "${RED}❌ BentoML CLI not working${NC}"
 fi
 
+# Source .env file if it exists
+if [ -f .env ]; then
+    source .env
+fi
+
 # Check ports
-echo -n "Checking port 3000 availability... "
-if lsof -i :3000 > /dev/null 2>&1; then
-    echo -e "${YELLOW}⚠️  Port 3000 is in use${NC}"
-    echo -e "${YELLOW}   You may need to stop the service using port 3000${NC}"
+BENTOML_PORT=${BENTOML_PORT:-3000}
+echo -n "Checking port ${BENTOML_PORT} availability... "
+if lsof -i :${BENTOML_PORT} > /dev/null 2>&1; then
+    echo -e "${YELLOW}⚠️  Port ${BENTOML_PORT} is in use${NC}"
+    echo -e "${YELLOW}   You may need to stop the service using port ${BENTOML_PORT}${NC}"
 else
-    echo -e "${GREEN}✅ Port 3000 available${NC}"
+    echo -e "${GREEN}✅ Port ${BENTOML_PORT} available${NC}"
 fi
 
 # Summary
@@ -131,7 +137,7 @@ if [ ${#MISSING_PACKAGES[@]} -eq 0 ]; then
     echo "2. Create a BentoML service (e.g., service.py)" 
     echo "3. Build your service: ./scripts/run_bentoml.sh build service.py"
     echo "4. Run your service: ./scripts/run_bentoml.sh serve <service_name>:latest"
-    echo "5. Visit http://127.0.0.1:3000 in your browser"
+    echo "5. Visit ${BENTOML_PROTOCOL:-http}://${BENTOML_HOST:-127.0.0.1}:${BENTOML_PORT} in your browser"
     echo ""
     echo -e "${BLUE}UV Commands:${NC}"
     echo "• Run commands: uv run <command>"

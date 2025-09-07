@@ -60,10 +60,15 @@ start_server() {
     
     echo -e "${GREEN}🎯 Starting BentoML server for: ${bento_tag}${NC}"
     
+    # Source .env file if it exists
+    if [ -f .env ]; then
+        source .env
+    fi
+    
     # Start the server with local configuration using UV
     BENTOML_CONFIG_FILE=$CONFIG_FILE uv run bentoml serve $bento_tag \
-        --host 127.0.0.1 \
-        --port 3000 \
+        --host ${BENTOML_HOST:-127.0.0.1} \
+        --port ${BENTOML_PORT:-3000} \
         --reload \
         --development
 }
@@ -118,7 +123,7 @@ show_help() {
     echo -e "${YELLOW}Configuration:${NC}"
     echo "  - Config file: $CONFIG_FILE"
     echo "  - Environment file: $ENV_FILE (optional)"
-    echo "  - Server URL: http://127.0.0.1:3000"
+    echo "  - Server URL: ${BENTOML_PROTOCOL:-http}://${BENTOML_HOST:-127.0.0.1}:${BENTOML_PORT:-3000}"
 }
 
 # Parse command line arguments
