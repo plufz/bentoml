@@ -1,11 +1,7 @@
 #!/bin/bash
 
-# BentoML Endpoint Testing Script
+# BentoML Endpoint Testing Script - Configuration-driven version
 # Usage: ./scripts/endpoint.sh <endpoint-name> <json-payload>
-# Examples:
-#   ./scripts/endpoint.sh health '{}'
-#   ./scripts/endpoint.sh hello '{"name": "World"}'
-#   ./scripts/endpoint.sh generate_image '{"prompt": "A beautiful sunset"}'
 
 set -e
 
@@ -27,6 +23,62 @@ DEFAULT_PORT="${BENTOML_PORT:-3000}"
 DEFAULT_PROTOCOL="${BENTOML_PROTOCOL:-http}"
 BASE_URL="${DEFAULT_PROTOCOL}://${DEFAULT_HOST}:${DEFAULT_PORT}"
 
+CONFIG_FILE="scripts/endpoints-config.json"
+
+# Function to load and display endpoint examples from config
+show_examples_from_config() {
+    if ! command -v jq &> /dev/null; then
+        echo "  $0 health '{}'"
+        echo "  $0 hello '{\"name\": \"World\"}'"
+        return
+    fi
+    
+    if [ ! -f "$CONFIG_FILE" ]; then
+        echo "  $0 health '{}'"
+        echo "  $0 hello '{\"name\": \"World\"}'"
+        return
+    fi
+    
+    # System endpoints
+    local system_count=$(jq '.system_endpoints | length' "$CONFIG_FILE" 2>/dev/null || echo "0")
+    for (( i=0; i<system_count && i<2; i++ )); do
+        local name=$(jq -r ".system_endpoints[$i].name" "$CONFIG_FILE")
+        local payload=$(jq -r ".system_endpoints[$i].example_payload" "$CONFIG_FILE")
+        echo "  $0 $name '$payload'"
+    done
+    
+    # Service endpoints (selected examples)
+    local services=$(jq -r '.service_endpoints[].endpoints[] | select(.example_payload != "multipart") | "\(.name) \(.example_payload)"' "$CONFIG_FILE" 2>/dev/null | head -6)
+    while IFS=' ' read -r name payload; do
+        if [ -n "$name" ] && [ -n "$payload" ]; then
+            echo "  $0 $name '$payload'"
+        fi
+    done <<< "$services"
+}
+
+# Function to show available endpoints summary
+show_available_endpoints_summary() {
+    echo "Available Endpoints:"
+    
+    if ! command -v jq &> /dev/null || [ ! -f "$CONFIG_FILE" ]; then
+        echo "  Use --list to see all endpoints (requires jq)"
+        return
+    fi
+    
+    # System endpoints count
+    local system_count=$(jq '.system_endpoints | length' "$CONFIG_FILE" 2>/dev/null || echo "0")
+    echo "  System: $system_count endpoints (health, info, etc.)"
+    
+    # Service endpoints
+    jq -r '.service_endpoints[] | "  \(.service): \(.endpoints | length) endpoints"' "$CONFIG_FILE" 2>/dev/null
+    
+    echo ""
+    local note=$(jq -r '.image_processing_note // empty' "$CONFIG_FILE" 2>/dev/null)
+    if [ -n "$note" ]; then
+        echo "Note: $note"
+    fi
+}
+
 # Function to show usage
 show_usage() {
     echo -e "${BLUE}🔧 BentoML Endpoint Testing Script${NC}"
@@ -34,56 +86,74 @@ show_usage() {
     echo "Usage: $0 <endpoint-name> <json-payload> [options]"
     echo ""
     echo "Examples:"
-    echo "  $0 health '{}'"
-    echo "  $0 hello '{\"name\": \"World\"}'"
-    echo "  $0 generate_image '{\"prompt\": \"A beautiful sunset\", \"width\": 512, \"height\": 512}'"
-    echo "  $0 analyze_image '{\"image\": \"base64...\", \"prompt\": \"What is in this image?\"}'"
-    echo "  $0 analyze_image_url '{\"image_url\": \"https://plufz.com/test-assets/test-office.jpg\", \"prompt\": \"What is in this image?\"}'"
-    echo "  $0 transcribe_url '{\"url\": \"https://plufz.com/test-assets/test-english.mp3\"}'"
-    echo "  $0 upscale_url '{\"url\": \"https://plufz.com/test-assets/test-office.jpg\", \"scale_factor\": 2.0}'"
-    echo "  $0 rag_ingest_text '{\"text\": \"This is a test document about AI and machine learning.\", \"metadata\": {\"source\": \"test\"}}'"
-    echo "  $0 rag_query '{\"query\": \"What is machine learning?\", \"max_tokens\": 512, \"temperature\": 0.1}'"
-    echo "  $0 rag_clear_index '{}'"
+    show_examples_from_config
     echo ""
     echo "Options:"
     echo "  --host <host>     Server host (default: ${DEFAULT_HOST})"
     echo "  --port <port>     Server port (default: ${DEFAULT_PORT})"
     echo "  --verbose         Show detailed curl output"
-    echo "  --help           Show this help message"
+    echo "  --list, -l        List all available endpoints"
+    echo "  --help, -h        Show this help message"
     echo ""
-    echo "Available Endpoints:"
-    echo "  System endpoints:"
-    echo "    health          - Health check"
-    echo "    info            - Service information"
+    show_available_endpoints_summary
+}
+
+# Function to list all endpoints with details
+list_all_endpoints() {
+    echo -e "${BLUE}📋 Available BentoML Endpoints${NC}"
     echo ""
-    echo "  Hello Service:"
-    echo "    hello           - Simple greeting"
+    
+    if ! command -v jq &> /dev/null; then
+        echo -e "${RED}❌ jq not found. Cannot parse endpoint configuration${NC}"
+        return 1
+    fi
+    
+    if [ ! -f "$CONFIG_FILE" ]; then
+        echo -e "${RED}❌ Configuration file not found: $CONFIG_FILE${NC}"
+        return 1
+    fi
+    
+    # System endpoints
+    echo -e "${GREEN}🔧 System Endpoints:${NC}"
+    local system_count=$(jq '.system_endpoints | length' "$CONFIG_FILE" 2>/dev/null)
+    for (( i=0; i<system_count; i++ )); do
+        local name=$(jq -r ".system_endpoints[$i].name" "$CONFIG_FILE")
+        local description=$(jq -r ".system_endpoints[$i].description" "$CONFIG_FILE")
+        local payload=$(jq -r ".system_endpoints[$i].example_payload" "$CONFIG_FILE")
+        
+        echo -e "  ${YELLOW}$name${NC} - $description"
+        echo "    Example: $0 $name '$payload'"
+    done
     echo ""
-    echo "  Stable Diffusion:"
-    echo "    generate_image  - Generate image from text prompt"
-    echo ""
-    echo "  LLaVA Vision:"
-    echo "    analyze_image   - Analyze uploaded image (base64/bytes)"
-    echo "    analyze_image_url - Analyze image from URL"  
-    echo "    example_schemas - Get example JSON schemas"
-    echo ""
-    echo "  Whisper Audio:"
-    echo "    transcribe_file - Transcribe uploaded audio file"
-    echo "    transcribe_url  - Transcribe audio from URL"
-    echo ""
-    echo "  Photo Upscaler:"
-    echo "    upscale_file    - Upscale uploaded image file"
-    echo "    upscale_url     - Upscale image from URL"
-    echo ""
-    echo "  RAG Service:"
-    echo "    rag_ingest_text - Ingest text document into RAG system"
-    echo "    rag_ingest_pdf  - Ingest PDF file into RAG system"
-    echo "    rag_ingest_txt_file - Ingest text file into RAG system"
-    echo "    rag_query       - Query the RAG system"
-    echo "    rag_clear_index - Clear all documents from RAG index"
-    echo ""
-    echo "Note: Image endpoints (generate_image, upscale_*) automatically extract"
-    echo "      base64 image data and save to endpoint_images/ directory."
+    
+    # Service endpoints
+    local services_count=$(jq '.service_endpoints | length' "$CONFIG_FILE" 2>/dev/null)
+    for (( i=0; i<services_count; i++ )); do
+        local service_name=$(jq -r ".service_endpoints[$i].service" "$CONFIG_FILE")
+        echo -e "${GREEN}🔧 $service_name:${NC}"
+        
+        local endpoints_count=$(jq ".service_endpoints[$i].endpoints | length" "$CONFIG_FILE")
+        for (( j=0; j<endpoints_count; j++ )); do
+            local name=$(jq -r ".service_endpoints[$i].endpoints[$j].name" "$CONFIG_FILE")
+            local description=$(jq -r ".service_endpoints[$i].endpoints[$j].description" "$CONFIG_FILE")
+            local payload=$(jq -r ".service_endpoints[$i].endpoints[$j].example_payload" "$CONFIG_FILE")
+            local requires_file=$(jq -r ".service_endpoints[$i].endpoints[$j].requires_file // false" "$CONFIG_FILE")
+            
+            echo -e "  ${YELLOW}$name${NC} - $description"
+            if [ "$payload" = "multipart" ] || [ "$requires_file" = "true" ]; then
+                echo "    Example: curl -X POST http://127.0.0.1:3000/$name -F \"file=@./example.ext\""
+            else
+                echo "    Example: $0 $name '$payload'"
+            fi
+        done
+        echo ""
+    done
+    
+    # Notes
+    local note=$(jq -r '.image_processing_note // empty' "$CONFIG_FILE" 2>/dev/null)
+    if [ -n "$note" ]; then
+        echo -e "${BLUE}📝 Note:${NC} $note"
+    fi
 }
 
 # Function to process image responses - extract base64 and save as files
@@ -102,7 +172,6 @@ process_image_response() {
     fi
     
     # Use Python to extract base64 image and save file
-    # Write response to temporary file to avoid shell escaping issues
     local temp_response_file=$(mktemp)
     echo "$response" > "$temp_response_file"
     
@@ -148,12 +217,12 @@ try:
         
         # Pretty print the modified response
         print(json.dumps(response, indent=2))
-        print(f'\n🎉 Image saved to: {filename}')
+        print(f'\\n🎉 Image saved to: {filename}')
         print(f'📊 Image size: {len(image_data)} bytes')
     else:
         # No image data found, just print the response
         print(json.dumps(response, indent=2))
-        print('\n⚠️  No base64 image data found in response')
+        print('\\n⚠️  No base64 image data found in response')
         
 except json.JSONDecodeError:
     print('Error: Invalid JSON response', file=sys.stderr)
@@ -165,6 +234,29 @@ EOF
 
     # Clean up temp file
     rm -f "$temp_response_file"
+}
+
+# Function to check if endpoint is image endpoint
+is_image_endpoint() {
+    local endpoint="$1"
+    
+    if command -v jq &> /dev/null && [ -f "$CONFIG_FILE" ]; then
+        # Check if endpoint is marked as image endpoint in config
+        local is_image=$(jq -r ".service_endpoints[].endpoints[] | select(.name == \"$endpoint\") | .is_image_endpoint // false" "$CONFIG_FILE" 2>/dev/null)
+        if [ "$is_image" = "true" ]; then
+            return 0
+        fi
+    else
+        # Fallback to hardcoded list if jq/config unavailable
+        local image_endpoints="generate_image upscale_file upscale_url"
+        for img_endpoint in $image_endpoints; do
+            if [[ "$endpoint" == "$img_endpoint" ]]; then
+                return 0
+            fi
+        done
+    fi
+    
+    return 1
 }
 
 # Parse command line arguments
@@ -188,7 +280,11 @@ while [[ $# -gt 0 ]]; do
             VERBOSE=true
             shift
             ;;
-        --help)
+        --list|-l)
+            list_all_endpoints
+            exit 0
+            ;;
+        --help|-h)
             show_usage
             exit 0
             ;;
@@ -290,17 +386,7 @@ if [[ $CURL_EXIT_CODE -eq 0 ]]; then
     # Try to format JSON response
     if echo "$RESPONSE" | python3 -m json.tool >/dev/null 2>&1; then
         # Check if this is an image-generating endpoint
-        IMAGE_ENDPOINTS="generate_image upscale_file upscale_url"
-        IS_IMAGE_ENDPOINT=false
-        
-        for img_endpoint in $IMAGE_ENDPOINTS; do
-            if [[ "$ENDPOINT" == "$img_endpoint" ]]; then
-                IS_IMAGE_ENDPOINT=true
-                break
-            fi
-        done
-        
-        if [[ "$IS_IMAGE_ENDPOINT" == true ]]; then
+        if is_image_endpoint "$ENDPOINT"; then
             # Handle image response - extract base64 and save as file
             process_image_response "$RESPONSE" "$ENDPOINT"
         else
