@@ -19,15 +19,38 @@
 # 2. Verify setup
 ./scripts/check_setup.sh
 
-# 3. Run tests (optional)
-./scripts/test.sh
+# 3. Build and start all services
+./scripts/build_services.sh
+./scripts/start.sh
 
-# 4. Generate your first image
-BENTOFILE=bentofile_sd.yaml ./scripts/run_bentoml.sh build services/stable_diffusion_service.py
-./scripts/run_bentoml.sh serve stable_diffusion_service:latest
+# 4. Check service health
+./scripts/health.sh
 ```
 
 Then visit: **http://127.0.0.1:3000/docs** for the interactive API!
+
+## 🍺 Homebrew Service (macOS)
+
+To run as a system service using Homebrew:
+
+```bash
+# 1. Install as a Homebrew service
+brew install --formula ./config/brew-bentoml-service.rb
+
+# 2. Start the service
+brew services start bentoml-multiservice
+
+# 3. Check service status
+brew services list | grep bentoml
+
+# 4. Stop the service
+brew services stop bentoml-multiservice
+
+# 5. View service logs
+tail -f /opt/homebrew/var/log/bentoml-multiservice.log
+```
+
+The service will automatically start on boot and restart if it crashes.
 
 ## 🎯 Available Services
 

@@ -191,6 +191,7 @@ class TestLLaVAServiceIntegration:
         assert base64_image.isascii()
     
     @pytest.mark.slow
+    @pytest.mark.timeout(180)
     @pytest.fixture(scope="class")
     def running_llava_service(self) -> Generator[str, None, None]:
         """Start LLaVA service - may be slow due to model loading"""
@@ -232,6 +233,7 @@ class TestLLaVAServiceIntegration:
                 pass
     
     @pytest.mark.slow
+    @pytest.mark.timeout(30)
     def test_health_endpoint_integration(self, running_llava_service: str):
         """Test health endpoint with actual service"""
         response = requests.post(f"{running_llava_service}/health", json={})
@@ -241,7 +243,8 @@ class TestLLaVAServiceIntegration:
         assert data["service"] == "LLaVAService"
         assert "capabilities" in data
     
-    @pytest.mark.slow 
+    @pytest.mark.slow
+    @pytest.mark.timeout(30) 
     def test_example_schemas_endpoint(self, running_llava_service: str):
         """Test get_example_schemas endpoint"""
         response = requests.post(f"{running_llava_service}/get_example_schemas", json={})
@@ -252,6 +255,7 @@ class TestLLaVAServiceIntegration:
         assert "object_detection" in data
     
     @pytest.mark.slow
+    @pytest.mark.timeout(120)
     def test_analyze_image_with_test_image(self, running_llava_service: str, sample_image_path: Path):
         """Test image analysis with actual test image"""
         if not sample_image_path.exists():

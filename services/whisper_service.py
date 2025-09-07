@@ -58,10 +58,10 @@ class WhisperService:
             safe_json_string = orjson.dumps(result)
             safe_data = orjson.loads(safe_json_string)
             
-            # Add success indicator
-            safe_data["success"] = True
-            
-            return safe_data
+            return {
+                "success": True,
+                "transcription": safe_data
+            }
             
         except Exception as e:
             return {
@@ -93,10 +93,10 @@ class WhisperService:
             safe_json_string = orjson.dumps(result)
             safe_data = orjson.loads(safe_json_string)
             
-            # Add success indicator
-            safe_data["success"] = True
-            
-            return safe_data
+            return {
+                "success": True,
+                "transcription": safe_data
+            }
             
         except Exception as e:
             return {
@@ -133,8 +133,14 @@ class WhisperService:
         
         # Save to temp file
         with tempfile.NamedTemporaryFile(suffix=extension, delete=False) as tmp:
-            for chunk in response.iter_content(chunk_size=8192):
-                tmp.write(chunk)
+            # Handle both real responses and mock responses in tests
+            if hasattr(response, 'iter_content') and callable(response.iter_content):
+                for chunk in response.iter_content(chunk_size=8192):
+                    if chunk:  # Filter out keep-alive chunks
+                        tmp.write(chunk)
+            else:
+                # Fallback for mocked responses
+                tmp.write(response.content)
             tmp_path = tmp.name
         
         return tmp_path
@@ -181,3 +187,14 @@ class WhisperService:
             # Clean up temp WAV file
             if os.path.exists(wav_filepath):
                 os.remove(wav_filepath)
+    
+    @bentoml.api
+    def health(self) -> Dict[str, Any]:
+        """Health check endpoint"""
+        return {
+            "service": "WhisperService",
+            "version": "1.0.0",
+            "model": self.model_name,
+            "capabilities": ["url_transcription", "file_transcription"],
+            "status": "healthy"
+        }

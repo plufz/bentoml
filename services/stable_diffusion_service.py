@@ -46,36 +46,47 @@ class StableDiffusionService:
     def generate_image(self, request: ImageGenerationRequest) -> Dict[str, Any]:
         """Generate an image from a text prompt"""
         
-        # Validate and adjust dimensions 
-        width, height = validate_dimensions(request.width, request.height)
-        
-        # Generate image using pipeline manager
-        result = self.pipeline_manager.generate(
-            prompt=request.prompt,
-            negative_prompt=request.negative_prompt if request.negative_prompt else None,
-            width=width,
-            height=height,
-            num_inference_steps=request.num_inference_steps,
-            guidance_scale=request.guidance_scale,
-            seed=request.seed if request.seed >= 0 else None
-        )
-        
-        # Get the generated image and convert to base64
-        image = result.images[0]
-        image_base64 = pil_to_base64(image)
-        
-        return {
-            "success": True,
-            "image": image_base64,
-            "prompt": request.prompt,
-            "negative_prompt": request.negative_prompt,
-            "width": width,
-            "height": height,
-            "num_inference_steps": request.num_inference_steps,
-            "guidance_scale": request.guidance_scale,
-            "seed": request.seed,
-            "device_used": self.device
-        }
+        try:
+            # Validate and adjust dimensions 
+            width, height = validate_dimensions(request.width, request.height)
+            
+            # Generate image using pipeline manager
+            result = self.pipeline_manager.generate(
+                prompt=request.prompt,
+                negative_prompt=request.negative_prompt if request.negative_prompt else None,
+                width=width,
+                height=height,
+                num_inference_steps=request.num_inference_steps,
+                guidance_scale=request.guidance_scale,
+                seed=request.seed if request.seed >= 0 else None
+            )
+            
+            # Get the generated image and convert to base64
+            image = result.images[0]
+            image_base64 = pil_to_base64(image)
+            
+            generation_info = {
+                "prompt": request.prompt,
+                "negative_prompt": request.negative_prompt,
+                "width": width,
+                "height": height,
+                "num_inference_steps": request.num_inference_steps,
+                "guidance_scale": request.guidance_scale,
+                "seed": request.seed,
+                "device_used": self.device
+            }
+            
+            return {
+                "success": True,
+                "image_base64": image_base64,
+                "generation_info": generation_info
+            }
+            
+        except Exception as e:
+            return {
+                "success": False,
+                "error": f"Image generation failed: {str(e)}"
+            }
     
     @bentoml.api
     def health(self) -> Dict[str, Any]:
@@ -85,4 +96,9 @@ class StableDiffusionService:
             "service": "StableDiffusionService",
             "version": "1.0.0"
         })
+        
+        # Ensure capabilities field exists
+        if "capabilities" not in health_info:
+            health_info["capabilities"] = ["text_to_image"]
+        
         return health_info

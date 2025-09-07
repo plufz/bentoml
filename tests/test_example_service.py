@@ -64,30 +64,34 @@ class TestHelloServiceIntegration:
     """Integration tests for HelloService - testing with actual service"""
     
     @pytest.fixture(scope="class")
+    @pytest.mark.timeout(60)
     def running_service(self) -> Generator[str, None, None]:
         """Start HelloService and return base URL"""
         # Start service in background
         process = subprocess.Popen([
             "uv", "run", "bentoml", "serve", 
             "services.example_service:HelloService",
-            "--port", "3001",
+            "--port", "3002",
             "--reload"
         ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         
         # Wait for service to start
-        base_url = "http://127.0.0.1:3001"
+        base_url = "http://127.0.0.1:3002"
         max_attempts = 30
         for _ in range(max_attempts):
             try:
-                response = requests.get(f"{base_url}/health", timeout=1)
+                response = requests.post(f"{base_url}/health", json={}, timeout=1)
                 if response.status_code == 200:
                     break
             except requests.RequestException:
                 pass
             time.sleep(1)
         else:
+            # Capture output for debugging
+            stdout, stderr = process.communicate(timeout=5)
             process.terminate()
-            pytest.fail("Service failed to start within timeout")
+            error_msg = f"Service failed to start within timeout.\nSTDOUT:\n{stdout.decode()}\nSTDERR:\n{stderr.decode()}"
+            pytest.fail(error_msg)
             
         yield base_url
         
@@ -102,11 +106,13 @@ class TestHelloServiceIntegration:
         except (psutil.NoSuchProcess, psutil.TimeoutExpired):
             pass
     
+    @pytest.mark.timeout(15)
     def test_service_startup(self, running_service: str):
         """Test that service starts successfully"""
         response = requests.get(f"{running_service}/")
         assert response.status_code == 200
     
+    @pytest.mark.timeout(10)
     def test_health_endpoint(self, running_service: str):
         """Test health endpoint via HTTP"""
         response = requests.post(f"{running_service}/health", json={})
@@ -117,9 +123,10 @@ class TestHelloServiceIntegration:
         assert data["service"] == "HelloService"
         assert data["version"] == "1.0.0"
     
+    @pytest.mark.timeout(10)
     def test_hello_endpoint(self, running_service: str):
         """Test hello endpoint via HTTP"""
-        payload = {"name": "BentoML Test"}
+        payload = {"request": {"name": "BentoML Test"}}
         response = requests.post(f"{running_service}/hello", json=payload)
         
         assert response.status_code == 200
@@ -128,18 +135,20 @@ class TestHelloServiceIntegration:
         assert data["status"] == "success"
         assert data["service"] == "BentoML Local Test"
     
+    @pytest.mark.timeout(10)
     def test_hello_endpoint_default_name(self, running_service: str):
         """Test hello endpoint with default name"""
-        response = requests.post(f"{running_service}/hello", json={})
+        response = requests.post(f"{running_service}/hello", json={"request": {}})
         
         assert response.status_code == 200
         data = response.json()
         assert data["message"] == "Hello, World!"
         assert data["status"] == "success"
     
+    @pytest.mark.timeout(10)
     def test_invalid_endpoint(self, running_service: str):
         """Test that invalid endpoints return 404"""
-        response = requests.post(f"{running_service}/nonexistent", json={})
+        response = requests.post(f"{running_service}/nonexistent", json={"request": {}})
         assert response.status_code == 404
 
 

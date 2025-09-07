@@ -13,6 +13,10 @@ This is a BentoML local development setup configured to run on macOS without Doc
 
 - `scripts/setup_env.sh` - Installs UV and sets up environment
 - `scripts/run_bentoml.sh` - Script to build/serve BentoML services
+- `scripts/start.sh` - Quick start script for multi-service
+- `scripts/build_services.sh` - Build all services script
+- `scripts/health.sh` - Check health of running BentoML service
+- `scripts/endpoint.sh` - Test any service endpoint with JSON payloads
 - `scripts/check_setup.sh` - Verifies installation and configuration
 - `scripts/test_service.sh` - Automated testing script
 - `pyproject.toml` - UV project configuration with dependencies  
@@ -31,9 +35,52 @@ This is a BentoML local development setup configured to run on macOS without Doc
 
 1. **Setup**: Run `./scripts/setup_env.sh` to install UV and dependencies
 2. **Verify**: Run `./scripts/check_setup.sh` to confirm setup
-3. **Build**: Use `./scripts/run_bentoml.sh build <service.py>` to build services
-4. **Serve**: Use `./scripts/run_bentoml.sh serve <module.service:ServiceClass>` to run services
-5. **Test**: Use service-specific test scripts for automated testing
+3. **Build**: Use `./scripts/build_services.sh` to build all services
+4. **Serve**: Use `./scripts/start.sh` to start the multi-service
+5. **Health Check**: Use `./scripts/health.sh` to check service health
+6. **Test**: Use service-specific test scripts for automated testing
+
+### Quick Start Scripts
+
+For convenience, use these scripts for common operations:
+```bash
+./scripts/start.sh           # Start the multi-service 
+./scripts/build_services.sh  # Build all services
+./scripts/health.sh          # Check health of running service
+./scripts/endpoint.sh <endpoint> <json>  # Test any endpoint
+```
+
+### Testing Endpoints
+
+Use the endpoint testing script for interactive API testing:
+
+```bash
+# Test health check
+./scripts/endpoint.sh health '{}'
+
+# Test hello service with custom name
+./scripts/endpoint.sh hello '{"name": "BentoML"}'
+
+# Test with empty payload (uses defaults)
+./scripts/endpoint.sh hello '{}'
+
+# Test Stable Diffusion image generation
+./scripts/endpoint.sh generate_image '{"prompt": "A beautiful sunset", "width": 512, "height": 512}'
+
+# Test LLaVA image analysis
+./scripts/endpoint.sh analyze_image '{"image_data": "base64...", "query": "What is in this image?"}'
+
+# Test Whisper audio transcription
+./scripts/endpoint.sh transcribe_url '{"url": "https://example.com/audio.mp3"}'
+
+# Use custom host/port and verbose output
+./scripts/endpoint.sh health '{}' --host localhost --port 3001 --verbose
+
+# Get help with available endpoints
+./scripts/endpoint.sh --help
+```
+
+**Note**: The script automatically wraps payloads in BentoML's expected `{"request": {...}}` format for service endpoints, while system endpoints (health, info) use direct payloads.
 
 ### Running Services
 
@@ -194,6 +241,21 @@ uv run pytest tests/test_example_service.py::TestHelloServiceUnit
 - Slow tests marked with `@pytest.mark.slow` for optional skipping
 - Automatic mock setup for services to avoid model loading during unit tests
 
+**Timeout Configuration**:
+- **Global default timeout**: 30 seconds per test (configured in `pyproject.toml`)
+- **Custom timeouts**: Individual tests can override with `@pytest.mark.timeout(seconds)`
+- **Integration test timeouts**: 
+  - Service fixtures: 60-180 seconds (for model loading/startup)
+  - API endpoint tests: 10-30 seconds 
+  - Image processing tests: 120 seconds
+- **Unit test timeouts**: Use global default (30 seconds)
+
+**Important**: Integration tests may timeout when trying to start actual BentoML services. **Timeouts are test failures, not passing tests.** If integration tests consistently timeout:
+- Check for port conflicts (services try to bind to specific ports)
+- Verify BentoML dependencies are properly installed
+- Consider running unit tests only with `-m "not slow"` flag for faster CI/development cycles
+- Timeout errors indicate the service failed to start within the expected time window
+
 **Available Test Files**:
 - `test_example_service.py` - Hello service unit and integration tests
 - `test_llava_service.py` - Vision-language service tests with image processing
@@ -206,7 +268,7 @@ uv run pytest tests/test_example_service.py::TestHelloServiceUnit
 - `./scripts/test_service.sh` - Basic service testing script
 - `./scripts/test_llava.sh` - LLaVA service testing script  
 - `./scripts/test_multi_service.sh` - Multi-service testing script
-- Health check: `POST /health` with `{}`
+- Health check: Use `./scripts/health.sh` (instead of manual curl commands)
 - Example endpoint: `POST /hello` with `{"request": {"name": "value"}}`
 - Web interface available at service root URL
 
@@ -296,3 +358,7 @@ For commit attribution, use only: "Generated with Claude"
 - Scripts include PATH setup automatically - no manual export needed
 - Services built with organized configuration files in `config/bentofiles/`
 - Modern Pydantic-based API (no deprecated `bentoml.io` imports)
+
+## Claude Instructions
+
+**IMPORTANT**: When checking BentoML service health, always use `./scripts/health.sh` instead of manual curl commands. This ensures consistent health check behavior and proper formatting.

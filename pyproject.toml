@@ -33,6 +33,7 @@ dependencies = [
 dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
+    "pytest-timeout>=2.1.0",
     "black>=23.0.0",
     "isort>=5.12.0",
     "ruff>=0.1.0",
@@ -44,6 +45,7 @@ dev = [
 dev-dependencies = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
+    "pytest-timeout>=2.1.0",
     "black>=23.0.0",
     "isort>=5.12.0",
     "ruff>=0.1.0",
@@ -102,6 +104,7 @@ python_classes = ["Test*"]
 python_functions = ["test_*"]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "timeout: marks tests with custom timeout values",
 ]
 addopts = [
     "--strict-markers",
@@ -109,5 +112,9 @@ addopts = [
     "--cov=.",
     "--cov-report=term-missing",
     "--cov-report=html:htmlcov",
+    "--timeout=30",
+    "--timeout-method=thread",
 ]
 pythonpath = ["."]
+timeout = 30
+timeout_method = "thread"

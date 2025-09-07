@@ -130,7 +130,7 @@ class TestStableDiffusionServiceUnit:
         
         mock_pipeline_instance = MagicMock()
         mock_pipeline_instance.device = "cuda"
-        mock_pipeline_instance.generate_image.side_effect = Exception("Generation failed")
+        mock_pipeline_instance.generate.side_effect = Exception("Generation failed")
         mock_pipeline.return_value = mock_pipeline_instance
         
         service = StableDiffusionService()

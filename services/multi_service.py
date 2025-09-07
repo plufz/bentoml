@@ -143,56 +143,57 @@ class MultiService:
             overall_healthy = False
         
         return {
-            "multi_service_status": "healthy" if overall_healthy else "degraded",
-            "services": services_status,
+            "status": "healthy" if overall_healthy else "degraded",
+            "service": "MultiService",
+            "individual_services": services_status,
             "version": "1.0.0",
             "description": "Multi-Service BentoML Application"
         }
     
     @bentoml.api
-    def info(self) -> MultiServiceResponse:
+    def info(self) -> Dict[str, Any]:
         """Get information about all available services and endpoints"""
         services = []
         
         if self.hello_service:
-            services.append(ServiceInfo(
-                name="Hello Service",
-                description="Simple greeting and health check service",
-                endpoints=["/hello"],
-                status="available"
-            ))
+            services.append({
+                "name": "Hello Service",
+                "description": "Simple greeting and health check service",
+                "endpoints": ["/hello"],
+                "status": "available"
+            })
         
         if self.stable_diffusion_service:
-            services.append(ServiceInfo(
-                name="Stable Diffusion",
-                description="Text-to-image generation using Stable Diffusion",
-                endpoints=["/generate_image"],
-                status="available"
-            ))
+            services.append({
+                "name": "Stable Diffusion",
+                "description": "Text-to-image generation using Stable Diffusion",
+                "endpoints": ["/generate_image"],
+                "status": "available"
+            })
         
         if self.llava_service:
-            services.append(ServiceInfo(
-                name="LLaVA",
-                description="Vision-language understanding and image analysis",
-                endpoints=["/analyze_image", "/analyze_structured", "/analyze_url", "/example_schemas"],
-                status="available"
-            ))
+            services.append({
+                "name": "LLaVA",
+                "description": "Vision-language understanding and image analysis",
+                "endpoints": ["/analyze_image", "/analyze_structured", "/analyze_url", "/example_schemas"],
+                "status": "available"
+            })
         
         if self.whisper_service:
-            services.append(ServiceInfo(
-                name="Whisper",
-                description="Audio transcription from files and URLs",
-                endpoints=["/transcribe_file", "/transcribe_url"],
-                status="available"
-            ))
+            services.append({
+                "name": "Whisper",
+                "description": "Audio transcription from files and URLs",
+                "endpoints": ["/transcribe_file", "/transcribe_url"],
+                "status": "available"
+            })
         
-        total_endpoints = sum(len(service.endpoints) for service in services) + 2  # +2 for health and info
+        total_endpoints = sum(len(service["endpoints"]) for service in services) + 2  # +2 for health and info
         
-        return MultiServiceResponse(
-            available_services=services,
-            total_endpoints=total_endpoints,
-            version="1.0.0"
-        )
+        return {
+            "available_services": services,
+            "total_endpoints": total_endpoints,
+            "version": "1.0.0"
+        }
     
     # Hello Service Endpoints
     @bentoml.api

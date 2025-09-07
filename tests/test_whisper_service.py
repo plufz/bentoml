@@ -77,7 +77,9 @@ class TestWhisperServiceUnit:
         service = WhisperService()
         request = TranscribeUrlRequest(url="https://example.com/test.mp3")
         
-        with patch.object(service, '_download_url', return_value="/tmp/test.mp3"):
+        with patch.object(service, '_download_url', return_value="/tmp/test.mp3"), \
+             patch.object(service, '_convert_wav', return_value="/tmp/test.wav"), \
+             patch('services.whisper_service.os.remove'):
             result = service.transcribe_url(request)
         
         assert result["success"] is True
@@ -118,12 +120,12 @@ class TestWhisperServiceUnit:
         
         service = WhisperService()
         
-        # Create mock file data
-        mock_file_data = b"fake_audio_file_content"
+        # Create mock file path
+        from pathlib import Path
+        mock_file_path = Path("/tmp/test_audio.wav")
         
-        with patch('tempfile.NamedTemporaryFile') as mock_temp:
-            mock_temp.return_value.__enter__.return_value.name = "/tmp/test_audio.wav"
-            result = service.transcribe_file(mock_file_data)
+        with patch.object(service, '_convert_wav', return_value="/tmp/test_audio.wav"):
+            result = service.transcribe_file(mock_file_path)
         
         assert result["success"] is True
         assert result["transcription"]["text"] == "File transcription test"
@@ -152,6 +154,7 @@ class TestWhisperServiceUnit:
         mock_response = Mock()
         mock_response.headers = {'content-type': 'audio/mpeg'}
         mock_response.content = b"audio_content_here"
+        mock_response.iter_content.return_value = [b"audio_content_here"]
         mock_response.raise_for_status = Mock()
         mock_get.return_value = mock_response
         
