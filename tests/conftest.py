@@ -4,6 +4,7 @@ Shared pytest fixtures for BentoML service testing
 
 import pytest
 import bentoml
+import os
 from pathlib import Path
 import tempfile
 import shutil
@@ -50,6 +51,38 @@ def mock_model_response():
 def test_request_data():
     """Standard test request data"""
     return {"request": {"name": "test"}}
+
+
+@pytest.fixture(scope="session")
+def bentoml_host():
+    """BentoML server host from environment"""
+    return os.getenv("BENTOML_HOST", "127.0.0.1")
+
+
+@pytest.fixture(scope="session")
+def bentoml_port():
+    """BentoML server port from environment"""
+    return os.getenv("BENTOML_PORT", "3000")
+
+
+@pytest.fixture(scope="session")
+def bentoml_protocol():
+    """BentoML server protocol from environment"""
+    return os.getenv("BENTOML_PROTOCOL", "http")
+
+
+@pytest.fixture(scope="session")
+def bentoml_base_url(bentoml_protocol: str, bentoml_host: str, bentoml_port: str):
+    """Base URL for BentoML service"""
+    return f"{bentoml_protocol}://{bentoml_host}:{bentoml_port}"
+
+
+def get_service_url(service_name: str, default_port: str = "3000") -> str:
+    """Get service URL from environment variables"""
+    protocol = os.getenv("BENTOML_PROTOCOL", "http")
+    host = os.getenv("BENTOML_HOST", "127.0.0.1")
+    port = os.getenv(f"{service_name.upper()}_SERVICE_PORT", default_port)
+    return f"{protocol}://{host}:{port}"
 
 
 @pytest.fixture
