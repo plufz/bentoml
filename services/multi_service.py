@@ -14,6 +14,7 @@ from services.stable_diffusion_service import StableDiffusionService
 from services.llava_service import LLaVAService
 from services.whisper_service import WhisperService
 from services.upscaler_service import PhotoUpscalerService
+from services.rag_service import RAGService
 
 # Import request models from individual services
 from services.example_service import HelloRequest
@@ -21,6 +22,9 @@ from services.stable_diffusion_service import ImageGenerationRequest
 from services.llava_service import VisionLanguageRequest, VisionLanguageUrlRequest
 from services.whisper_service import TranscribeUrlRequest
 from services.upscaler_service import UpscaleUrlRequest
+from services.rag_service import (
+    DocumentIngestRequest, RAGQueryRequest as RAGQuery
+)
 
 
 class ServiceInfo(BaseModel):
@@ -61,6 +65,7 @@ class MultiService:
     - LLaVA: Vision-language understanding and analysis
     - Whisper: Audio transcription from files and URLs
     - Photo Upscaler: AI-powered photo upscaling with Real-ESRGAN
+    - RAG Service: Document ingestion and question-answering system
     """
     
     def __init__(self):
@@ -99,6 +104,13 @@ class MultiService:
         except Exception as e:
             print(f"⚠️  Photo Upscaler Service failed to initialize: {e}")
             self.upscaler_service = None
+            
+        try:
+            self.rag_service = RAGService()
+            print("✅ RAG Service initialized")
+        except Exception as e:
+            print(f"⚠️  RAG Service failed to initialize: {e}")
+            self.rag_service = None
     
     @bentoml.api
     def health(self) -> Dict[str, Any]:
@@ -161,6 +173,16 @@ class MultiService:
         else:
             services_status["upscaler"] = {"status": "unavailable"}
             overall_healthy = False
+            
+        if self.rag_service:
+            try:
+                services_status["rag"] = self.rag_service.health()
+            except Exception as e:
+                services_status["rag"] = {"status": "error", "error": str(e)}
+                overall_healthy = False
+        else:
+            services_status["rag"] = {"status": "unavailable"}
+            overall_healthy = False
         
         return {
             "status": "healthy" if overall_healthy else "degraded",
@@ -212,6 +234,14 @@ class MultiService:
                 "name": "Photo Upscaler",
                 "description": "AI-powered photo upscaling with Real-ESRGAN",
                 "endpoints": ["/upscale_file", "/upscale_url"],
+                "status": "available"
+            })
+        
+        if self.rag_service:
+            services.append({
+                "name": "RAG Service",
+                "description": "Document ingestion and question-answering system",
+                "endpoints": ["/rag_ingest_text", "/rag_ingest_pdf", "/rag_ingest_txt_file", "/rag_query", "/rag_clear_index"],
                 "status": "available"
             })
         
@@ -290,3 +320,39 @@ class MultiService:
         if not self.upscaler_service:
             return {"error": "Photo Upscaler service is not available", "status": "error"}
         return self.upscaler_service.upscale_url(request)
+    
+    # RAG Service Endpoints
+    @bentoml.api
+    def rag_ingest_text(self, request: DocumentIngestRequest) -> Dict[str, Any]:
+        """Ingest text document into RAG system"""
+        if not self.rag_service:
+            return {"error": "RAG service is not available", "status": "error"}
+        return self.rag_service.ingest_text(request)
+    
+    @bentoml.api
+    def rag_ingest_pdf(self, pdf_file: Path) -> Dict[str, Any]:
+        """Ingest PDF file into RAG system"""
+        if not self.rag_service:
+            return {"error": "RAG service is not available", "status": "error"}
+        return self.rag_service.ingest_pdf(pdf_file)
+    
+    @bentoml.api
+    def rag_ingest_txt_file(self, txt_file: Path) -> Dict[str, Any]:
+        """Ingest text file into RAG system"""
+        if not self.rag_service:
+            return {"error": "RAG service is not available", "status": "error"}
+        return self.rag_service.ingest_txt_file(txt_file)
+    
+    @bentoml.api
+    def rag_query(self, request: RAGQuery) -> Dict[str, Any]:
+        """Query the RAG system"""
+        if not self.rag_service:
+            return {"error": "RAG service is not available", "status": "error"}
+        return self.rag_service.query(request)
+    
+    @bentoml.api
+    def rag_clear_index(self) -> Dict[str, Any]:
+        """Clear all documents from RAG index"""
+        if not self.rag_service:
+            return {"error": "RAG service is not available", "status": "error"}
+        return self.rag_service.clear_index()
