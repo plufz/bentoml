@@ -43,7 +43,7 @@ print_usage() {
     echo "  --all              Run all tests including slow integration tests"
     echo "  --coverage         Run fast tests with coverage report"
     echo "  --coverage-all     Run all tests with coverage report"
-    echo "  --service SERVICE  Run tests for specific service (example, llava, stable_diffusion, whisper, upscaler, multi)"
+    echo "  --service SERVICE  Run tests for specific service (example, llava, stable_diffusion, whisper, upscaler, multi, rag)"
     echo "  --unit             Run only unit tests"
     echo "  --behavior         Run only HTTP behavior tests"
     echo "  --integration      Run only integration tests (slow)"
@@ -145,9 +145,12 @@ if [[ -n "$SPECIFIC_SERVICE" ]]; then
         multi)
             PYTEST_ARGS+=("tests/test_multi_service.py")
             ;;
+        rag)
+            PYTEST_ARGS+=("tests/test_rag_service.py")
+            ;;
         *)
             echo -e "${RED}❌ Unknown service: $SPECIFIC_SERVICE${NC}"
-            echo "Available services: example, llava, stable_diffusion, whisper, upscaler, multi"
+            echo "Available services: example, llava, stable_diffusion, whisper, upscaler, multi, rag"
             exit 1
             ;;
     esac
