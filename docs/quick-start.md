@@ -102,9 +102,9 @@ Once running:
 
 ## Next Steps
 
-- **[Stable Diffusion Guide](stable-diffusion.md)** - Learn text-to-image generation
-- **[LLaVA Guide](llava-service.md)** - Learn image analysis with structured output
-- **[Photo Upscaler Guide](photo-upscaler.md)** - Learn AI-powered image upscaling
+- **[Stable Diffusion Guide](services/stable-diffusion.md)** - Learn text-to-image generation
+- **[LLaVA Guide](services/llava-service.md)** - Learn image analysis with structured output
+- **[Photo Upscaler Guide](services/photo-upscaler.md)** - Learn AI-powered image upscaling
 - **[Testing Guide](testing.md)** - Comprehensive testing approaches
 - **[Configuration](configuration.md)** - Customize your setup
 

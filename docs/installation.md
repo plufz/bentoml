@@ -179,8 +179,8 @@ Expected response:
 ## Next Steps
 
 - **[Quick Start Guide](quick-start.md)** - Build your first AI service
-- **[Stable Diffusion Service](stable-diffusion.md)** - Text-to-image generation
-- **[LLaVA Service](llava-service.md)** - Image analysis with AI
+- **[Stable Diffusion Service](services/stable-diffusion.md)** - Text-to-image generation
+- **[LLaVA Service](services/llava-service.md)** - Image analysis with AI
 - **[Configuration Guide](configuration.md)** - Customize your setup
 
 ## Troubleshooting Installation

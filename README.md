@@ -122,8 +122,8 @@ curl -X POST http://127.0.0.1:3000/upscale_file \
 - **[Configuration](docs/configuration.md)** - Customize your setup
 
 ### 🤖 AI Services  
-- **[Stable Diffusion Service](docs/stable-diffusion.md)** - Text-to-image generation
-- **[LLaVA Service](docs/llava-service.md)** - Vision-language analysis
+- **[Stable Diffusion Service](docs/services/stable-diffusion.md)** - Text-to-image generation
+- **[LLaVA Service](docs/services/llava-service.md)** - Vision-language analysis
 - **[Testing Guide](docs/testing.md)** - pytest test suite and legacy scripts
 
 ### 🔧 Advanced

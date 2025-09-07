@@ -334,7 +334,7 @@ df -h >> debug.txt
 
 ### Still Need Help?
 1. Check the specific service documentation:
-   - [Stable Diffusion Service](stable-diffusion.md)
-   - [LLaVA Service](llava-service.md)
+   - [Stable Diffusion Service](services/stable-diffusion.md)
+   - [LLaVA Service](services/llava-service.md)
 2. Review [Configuration Guide](configuration.md)
 3. Create an issue with your debug information

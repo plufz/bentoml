@@ -10,11 +10,11 @@ This directory contains comprehensive documentation for the BentoML local setup 
 - **[Configuration](configuration.md)** - Environment and service configuration
 
 ### Services
-- **[Stable Diffusion Service](stable-diffusion.md)** - Text-to-image generation
-- **[LLaVA Service](llava-service.md)** - Vision-language analysis with structured JSON output
-- **[Whisper Service](whisper-service.md)** - Audio transcription from files and URLs
-- **[Photo Upscaler Service](photo-upscaler.md)** - AI-powered photo upscaling with Real-ESRGAN
-- **[Example Service](example-service.md)** - Simple example for testing
+- **[Stable Diffusion Service](services/stable-diffusion.md)** - Text-to-image generation
+- **[LLaVA Service](services/llava-service.md)** - Vision-language analysis with structured JSON output
+- **[Whisper Service](services/whisper-service.md)** - Audio transcription from files and URLs
+- **[Photo Upscaler Service](services/photo-upscaler.md)** - AI-powered photo upscaling with Real-ESRGAN
+- **[Example Service](services/example-service.md)** - Simple example for testing
 
 ### Development
 - **[API Reference](api-reference.md)** - Complete API documentation
@@ -30,10 +30,10 @@ This directory contains comprehensive documentation for the BentoML local setup 
 | What you want to do | Go to |
 |---------------------|-------|
 | Set up the project for the first time | [Installation Guide](installation.md) |
-| Generate images from text | [Stable Diffusion Service](stable-diffusion.md) |
-| Analyze images with AI | [LLaVA Service](llava-service.md) |
-| Transcribe audio files | [Whisper Service](whisper-service.md) |
-| Upscale photos with AI | [Photo Upscaler Service](photo-upscaler.md) |
+| Generate images from text | [Stable Diffusion Service](services/stable-diffusion.md) |
+| Analyze images with AI | [LLaVA Service](services/llava-service.md) |
+| Transcribe audio files | [Whisper Service](services/whisper-service.md) |
+| Upscale photos with AI | [Photo Upscaler Service](services/photo-upscaler.md) |
 | Test your services | [Testing Guide](testing.md) |
 | Fix issues | [Troubleshooting](troubleshooting.md) |
 

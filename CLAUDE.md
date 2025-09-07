@@ -315,8 +315,8 @@ Complete reference to all documentation files in the project:
 - [docs/quick-start.md](docs/quick-start.md) - Quick start guide
 - [docs/testing.md](docs/testing.md) - Testing documentation
 - [docs/troubleshooting.md](docs/troubleshooting.md) - Troubleshooting guide
-- [docs/stable-diffusion.md](docs/stable-diffusion.md) - Stable Diffusion service guide
-- [docs/llava-service.md](docs/llava-service.md) - LLaVA service guide
+- [docs/services/stable-diffusion.md](docs/services/stable-diffusion.md) - Stable Diffusion service guide
+- [docs/services/llava-service.md](docs/services/llava-service.md) - LLaVA service guide
 
 ### BentoML Core Documentation
 - [docs/bentoml/README.md](docs/bentoml/README.md) - BentoML documentation overview
