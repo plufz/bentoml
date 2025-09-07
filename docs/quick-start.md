@@ -53,17 +53,45 @@ curl -X POST http://127.0.0.1:3000/generate_image \
   | jq '.success'
 ```
 
-### Option C: LLaVA (Image Analysis)
+### Option C: Photo Upscaler (AI Image Enhancement)
+```bash
+# Build
+./scripts/run_bentoml.sh build services/upscaler_service.py
+
+# Serve (will download ~100MB models on first run)
+./scripts/run_bentoml.sh serve upscaler_service:latest
+
+# Test
+./scripts/endpoint.sh upscale_url '{"url": "https://plufz.com/test-assets/test-office.jpg", "scale_factor": 2.0}'
+```
+
+### Option D: LLaVA (Image Analysis)
 ```bash
 # Build  
-BENTOFILE=bentofile_llava.yaml ./scripts/run_bentoml.sh build services/llava_service.py
+BENTOFILE=config/bentofiles/llava.yaml ./scripts/run_bentoml.sh build services/llava_service.py
 
 # Serve (will download ~13GB model on first run)
-./scripts/run_bentoml.sh serve l_la_va_service:latest
+./scripts/run_bentoml.sh serve llava_service:latest
 
 # Test
 ./scripts/test_llava.sh health
 ```
+
+### 🚀 Recommended: Multi-Service (All Services at Once)
+```bash
+# Build all services
+./scripts/build_services.sh
+
+# Serve all services together
+./scripts/start.sh
+
+# Test all services
+./scripts/test.sh --all
+```
+
+This gives you **12 endpoints in a single service**:
+- Hello service, Stable Diffusion, LLaVA, Whisper, Photo Upscaler
+- System endpoints (health, info)
 
 ## 4. Access Your Service
 
@@ -76,6 +104,7 @@ Once running:
 
 - **[Stable Diffusion Guide](stable-diffusion.md)** - Learn text-to-image generation
 - **[LLaVA Guide](llava-service.md)** - Learn image analysis with structured output
+- **[Photo Upscaler Guide](photo-upscaler.md)** - Learn AI-powered image upscaling
 - **[Testing Guide](testing.md)** - Comprehensive testing approaches
 - **[Configuration](configuration.md)** - Customize your setup
 

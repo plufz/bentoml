@@ -18,7 +18,7 @@ This is a BentoML local development setup configured to run on macOS without Doc
 - `scripts/health.sh` - Check health of running BentoML service
 - `scripts/endpoint.sh` - Test any service endpoint with JSON payloads
 - `scripts/check_setup.sh` - Verifies installation and configuration
-- `scripts/test_service.sh` - Automated testing script
+- `scripts/test.sh` - Pytest-based testing script
 - `pyproject.toml` - UV project configuration with dependencies  
 - `config/bentoml.yaml` - BentoML server configuration
 - `config/bentofiles/` - Service-specific Bento build configurations
@@ -26,10 +26,8 @@ This is a BentoML local development setup configured to run on macOS without Doc
 - `services/stable_diffusion_service.py` - Stable Diffusion image generation service
 - `services/llava_service.py` - LLaVA vision-language service using llama-cpp-python
 - `services/whisper_service.py` - Whisper audio transcription service
+- `services/upscaler_service.py` - Photo upscaler service using Real-ESRGAN
 - `services/multi_service.py` - Multi-service composition with unified endpoints
-- `scripts/test_llava.sh` - LLaVA service testing script
-- `scripts/test_whisper.sh` - Whisper service testing script
-- `scripts/test_multi_service.sh` - Multi-service comprehensive testing script
 
 ## Development Workflow
 
@@ -80,6 +78,15 @@ Use the endpoint testing script for interactive API testing:
 curl -X POST http://127.0.0.1:3000/transcribe_file \
   -F "audio_file=@./test-assets/test-english.mp3"
 
+# Test Photo Upscaler from URL
+./scripts/endpoint.sh upscale_url '{"url": "https://plufz.com/test-assets/test-office.jpg", "scale_factor": 2.0}'
+
+# Test Photo Upscaler from file (requires curl for file upload)
+curl -X POST http://127.0.0.1:3000/upscale_file \
+  -F "image_file=@./test-assets/test-upscale.jpg" \
+  -F "scale_factor=2.5" \
+  -F "output_format=PNG"
+
 # Use custom host/port and verbose output
 ./scripts/endpoint.sh health '{}' --host localhost --port 3001 --verbose
 
@@ -87,7 +94,9 @@ curl -X POST http://127.0.0.1:3000/transcribe_file \
 ./scripts/endpoint.sh --help
 ```
 
-**Note**: The script automatically wraps payloads in BentoML's expected `{"request": {...}}` format for service endpoints, while system endpoints (health, info) use direct payloads.
+**Notes**: 
+- The script automatically wraps payloads in BentoML's expected `{"request": {...}}` format for service endpoints, while system endpoints (health, info) use direct payloads.
+- Image endpoints (generate_image, upscale_*) automatically extract base64 image data and save to `endpoint_images/` directory with clean JSON output.
 
 ### Running Services
 
@@ -98,6 +107,12 @@ Services are served using the module path format:
 
 # LLaVA service  
 ./scripts/run_bentoml.sh serve services.llava_service:LLaVAService
+
+# Whisper service
+./scripts/run_bentoml.sh serve services.whisper_service:WhisperService
+
+# Photo Upscaler service
+./scripts/run_bentoml.sh serve services.upscaler_service:PhotoUpscalerService
 
 # Example service
 ./scripts/run_bentoml.sh serve services.example_service:ExampleService
@@ -114,6 +129,7 @@ Build services into Bento packages:
 BENTOFILE=config/bentofiles/stable-diffusion.yaml ./scripts/run_bentoml.sh build services/stable_diffusion_service.py
 BENTOFILE=config/bentofiles/whisper.yaml ./scripts/run_bentoml.sh build services/whisper_service.py
 BENTOFILE=config/bentofiles/llava.yaml ./scripts/run_bentoml.sh build services/llava_service.py
+BENTOFILE=config/bentofiles/upscaler.yaml ./scripts/run_bentoml.sh build services/upscaler_service.py
 ```
 
 ### Multi-Service Architecture
@@ -123,26 +139,27 @@ For unified deployment, use the multi-service composition:
 # Serve all services in a single unified endpoint
 BENTOFILE=config/bentofiles/multi-service.yaml ./scripts/run_bentoml.sh serve services.multi_service:MultiService
 
-# Test all services in the multi-service
-./scripts/test_multi_service.sh
+# Test all services in the multi-service  
+./scripts/test.sh --service multi
 ```
 
 **Multi-Service Endpoints:**
 - System: `/health`, `/info`
 - Hello Service: `/hello`
 - Stable Diffusion: `/generate_image`
-- LLaVA: `/analyze_image`, `/analyze_structured`, `/analyze_url`, `/example_schemas`
+- LLaVA: `/analyze_image`, `/analyze_image_url`, `/example_schemas`
 - Whisper: `/transcribe_file`, `/transcribe_url`
+- Photo Upscaler: `/upscale_file`, `/upscale_url`
 
-**Total: 10 endpoints in a single service** 🚀
+**Total: 12 endpoints in a single service** 🚀
 
 ### Testing Services
 
-Each service has its own test script:
+Test individual services with pytest:
 ```bash
-./scripts/test_llava.sh          # Test LLaVA service
-./scripts/test_service.sh        # Test general services
-./scripts/test_multi_service.sh  # Test all services in multi-service
+./scripts/test.sh --service llava        # Test LLaVA service
+./scripts/test.sh --service upscaler     # Test Photo Upscaler service  
+./scripts/test.sh --service multi        # Test all services in multi-service
 ```
 
 ## BentoML Service Pattern
@@ -195,6 +212,8 @@ Core dependencies managed by UV:
 - `llama-cpp-python>=0.2.27` - Fast GGUF model inference for LLaVA
 - `pydantic>=2.5.0` - Data validation with modern API
 - `jsonschema>=4.17.0` - JSON schema validation
+- `realesrgan>=0.3.0` - Real-ESRGAN AI upscaling models
+- `gfpgan>=1.3.8` - GFPGAN face enhancement for photo upscaling
 - `vllm>=0.3.0` - High-performance LLM serving (optional)
 - `openai>=1.0.0` - OpenAI API client (for examples)
 - `requests>=2.28.0` - HTTP client library
@@ -272,13 +291,14 @@ uv run pytest tests/test_example_service.py::TestHelloServiceUnit
 - `test_llava_service.py` - Vision-language service tests with image processing
 - `test_stable_diffusion_service.py` - Image generation service tests
 - `test_whisper_service.py` - Audio transcription service tests
+- `test_upscaler_service.py` - Photo upscaler service tests with Real-ESRGAN
 - `test_multi_service.py` - Multi-service composition tests
 
 ### Legacy Bash Scripts (Deprecated)
 
-- `./scripts/test_service.sh` - Basic service testing script
-- `./scripts/test_llava.sh` - LLaVA service testing script  
-- `./scripts/test_multi_service.sh` - Multi-service testing script
+- Use `./scripts/test.sh` instead of individual bash test scripts
+- Use `./scripts/endpoint.sh` for manual endpoint testing
+- Use `./scripts/health.sh` for service health checks
 - Health check: Use `./scripts/health.sh` (instead of manual curl commands)
 - Example endpoint: `POST /hello` with `{"request": {"name": "value"}}`
 - Web interface available at service root URL

@@ -5,7 +5,9 @@
 ## ✨ What This Gives You
 
 - **🎨 Stable Diffusion Service** - Generate images from text prompts
-- **👁️ LLaVA Vision Service** - Analyze images with structured JSON output  
+- **👁️ LLaVA Vision Service** - Analyze images with structured JSON output
+- **🎯 Whisper Audio Service** - Transcribe audio files and URLs
+- **📸 Photo Upscaler Service** - AI-powered photo upscaling with Real-ESRGAN
 - **⚡ Apple Silicon Optimized** - MPS acceleration for M1/M2/M3 Macs
 - **📦 UV Package Management** - Lightning-fast dependency resolution
 - **🔧 Zero Docker Required** - Pure Python with BentoML 1.4+
@@ -56,8 +58,10 @@ The service will automatically start on boot and restart if it crashes.
 
 | Service | What it does | Build & Serve |
 |---------|-------------|---------------|
-| **Stable Diffusion** | Text → Image generation | `BENTOFILE=bentofile_sd.yaml ./scripts/run_bentoml.sh build services/stable_diffusion_service.py` |
-| **LLaVA Vision** | Image + Text → JSON analysis | `BENTOFILE=bentofile_llava.yaml ./scripts/run_bentoml.sh build services/llava_service.py` |
+| **Stable Diffusion** | Text → Image generation | `BENTOFILE=config/bentofiles/stable-diffusion.yaml ./scripts/run_bentoml.sh build services/stable_diffusion_service.py` |
+| **LLaVA Vision** | Image + Text → JSON analysis | `BENTOFILE=config/bentofiles/llava.yaml ./scripts/run_bentoml.sh build services/llava_service.py` |
+| **Whisper Audio** | Audio → Text transcription | `BENTOFILE=config/bentofiles/whisper.yaml ./scripts/run_bentoml.sh build services/whisper_service.py` |
+| **Photo Upscaler** | Image → AI upscaled image | `BENTOFILE=config/bentofiles/upscaler.yaml ./scripts/run_bentoml.sh build services/upscaler_service.py` |
 | **Example** | Simple API for testing | `./scripts/run_bentoml.sh build services/example_service.py` |
 
 ### Testing Endpoints
@@ -90,11 +94,23 @@ Use the endpoint testing script for interactive API testing:
 curl -X POST http://127.0.0.1:3000/transcribe_file \
   -F "audio_file=@./test-assets/test-english.mp3"
 
+# Test Photo Upscaler from URL
+./scripts/endpoint.sh upscale_url '{"url": "https://plufz.com/test-assets/test-office.jpg", "scale_factor": 2.0}'
+
+# Test Photo Upscaler from file (requires curl for file upload)
+curl -X POST http://127.0.0.1:3000/upscale_file \
+  -F "image_file=@./test-assets/test-upscale.jpg" \
+  -F "scale_factor=2.5" \
+  -F "output_format=PNG"
+
 # Use custom host/port and verbose output
 ./scripts/endpoint.sh health '{}' --host localhost --port 3001 --verbose
 
 # Get help with available endpoints
 ./scripts/endpoint.sh --help
+```
+
+**Note**: Image endpoints (generate_image, upscale_*) automatically extract base64 image data and save actual image files to `endpoint_images/` directory, providing clean JSON output.
 
 ## 📚 Complete Documentation
 

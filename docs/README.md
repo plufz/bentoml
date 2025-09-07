@@ -12,6 +12,8 @@ This directory contains comprehensive documentation for the BentoML local setup 
 ### Services
 - **[Stable Diffusion Service](stable-diffusion.md)** - Text-to-image generation
 - **[LLaVA Service](llava-service.md)** - Vision-language analysis with structured JSON output
+- **[Whisper Service](whisper-service.md)** - Audio transcription from files and URLs
+- **[Photo Upscaler Service](photo-upscaler.md)** - AI-powered photo upscaling with Real-ESRGAN
 - **[Example Service](example-service.md)** - Simple example for testing
 
 ### Development
@@ -30,6 +32,8 @@ This directory contains comprehensive documentation for the BentoML local setup 
 | Set up the project for the first time | [Installation Guide](installation.md) |
 | Generate images from text | [Stable Diffusion Service](stable-diffusion.md) |
 | Analyze images with AI | [LLaVA Service](llava-service.md) |
+| Transcribe audio files | [Whisper Service](whisper-service.md) |
+| Upscale photos with AI | [Photo Upscaler Service](photo-upscaler.md) |
 | Test your services | [Testing Guide](testing.md) |
 | Fix issues | [Troubleshooting](troubleshooting.md) |
 
@@ -45,7 +49,9 @@ This setup uses:
 ## 🎯 Available Services
 
 - **Stable Diffusion**: Text → Image generation
-- **LLaVA**: Image + Text → Structured JSON analysis
+- **LLaVA**: Image + Text → Structured JSON analysis  
+- **Whisper**: Audio → Text transcription
+- **Photo Upscaler**: Image → AI upscaled image with Real-ESRGAN
 - **Example**: Simple hello world service for testing
 
 All services support:
