@@ -1,0 +1,67 @@
+# BentoML runtime and cache files that shouldn't trigger restarts
+bentoml_home/
+bentos/
+models/
+.coverage.*
+
+# Temporary and cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.tox/
+.coverage
+.pytest_cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# OS and editor files
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# Environment and build files
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+build/
+dist/
+*.egg-info/
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+docs/
+*.md
+README*
+
+# Test files and coverage reports
+tests/
+.coverage*
+htmlcov/
+.pytest_cache/
+
+# HuggingFace cache (custom location)
+/Volumes/Second/huggingface/
+
+# Temporary model files and downloads
+*.tmp
+*.temp
+temp/
+tmp/
