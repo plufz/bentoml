@@ -233,7 +233,7 @@ class TestWhisperServiceIntegration:
             pytest.skip("Test audio file not available")
         
         with open(sample_audio_path, "rb") as f:
-            files = {"file": ("test.mp3", f, "audio/mpeg")}
+            files = {"audio_file": ("test.mp3", f, "audio/mpeg")}
             
             response = requests.post(
                 f"{running_whisper_service}/transcribe_file",
