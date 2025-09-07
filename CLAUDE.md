@@ -73,8 +73,11 @@ Use the endpoint testing script for interactive API testing:
 # Test LLaVA image analysis from URL
 ./scripts/endpoint.sh analyze_image_url '{"image_url": "https://plufz.com/test-assets/test-office.jpg", "prompt": "What is in this image?"}'
 
-# Test Whisper audio transcription
+# Test Whisper audio transcription from URL
 ./scripts/endpoint.sh transcribe_url '{"url": "https://plufz.com/test-assets/test-english.mp3"}'
+
+# Test Whisper audio transcription from file
+./scripts/endpoint.sh transcribe_file '{"file": "./test-assets/test-english.mp3"}'
 
 # Use custom host/port and verbose output
 ./scripts/endpoint.sh health '{}' --host localhost --port 3001 --verbose
