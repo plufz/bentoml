@@ -1,8 +1,0 @@
-service: "services.example_service:HelloService"
-labels:
-  owner: bentoml-local-setup
-  stage: dev
-include:
-  - "services/"
-python:
-  requirements_txt: "./requirements.txt"
