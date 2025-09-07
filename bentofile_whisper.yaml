@@ -1,0 +1,22 @@
+service: "services.whisper_service:WhisperService"
+name: "whisper-service"
+description: "Audio transcription service using MLX Whisper"
+
+labels:
+  owner: bentoml-team
+  stage: dev
+
+include:
+  - "services/whisper_service.py"
+
+python:
+  requirements_txt: |
+    bentoml[io]>=1.2.0
+    mlx-whisper>=0.1.0
+    pydub>=0.25.0
+    requests>=2.28.0
+    orjson>=3.8.0
+    pydantic>=2.0.0
+
+models:
+  - "mlx-community/whisper-large-v3-turbo"
