@@ -19,7 +19,10 @@
 # 2. Verify setup
 ./scripts/check_setup.sh
 
-# 3. Generate your first image
+# 3. Run tests (optional)
+./scripts/test.sh
+
+# 4. Generate your first image
 BENTOFILE=bentofile_sd.yaml ./scripts/run_bentoml.sh build services/stable_diffusion_service.py
 ./scripts/run_bentoml.sh serve stable_diffusion_service:latest
 ```
@@ -46,7 +49,7 @@ Then visit: **http://127.0.0.1:3000/docs** for the interactive API!
 ### 🤖 AI Services  
 - **[Stable Diffusion Service](docs/stable-diffusion.md)** - Text-to-image generation
 - **[LLaVA Service](docs/llava-service.md)** - Vision-language analysis
-- **[Testing Guide](docs/testing.md)** - Test your services
+- **[Testing Guide](docs/testing.md)** - pytest test suite and legacy scripts
 
 ### 🔧 Advanced
 - **[API Reference](docs/api-reference.md)** - Complete API docs
@@ -61,15 +64,26 @@ bentoml-project/
 ├── scripts/             # 🛠️ Management scripts  
 │   ├── run_bentoml.sh   # Build & serve services
 │   ├── check_setup.sh   # Verify installation
-│   └── test_llava.sh    # Test LLaVA service
+│   └── test_*.sh        # Legacy test scripts (deprecated)
+├── tests/               # 🧪 Pytest test suite (recommended)
+│   ├── conftest.py      # Shared test fixtures
+│   ├── test_example_service.py
+│   ├── test_llava_service.py
+│   ├── test_stable_diffusion_service.py
+│   ├── test_whisper_service.py
+│   └── test_multi_service.py
 ├── services/            # 🤖 AI services
 │   ├── stable_diffusion_service.py
 │   ├── llava_service.py
+│   ├── whisper_service.py
+│   ├── multi_service.py
 │   └── example_service.py
 ├── utils/               # 🔧 Reusable utilities
 │   ├── stable_diffusion/ # SD pipeline utilities
 │   └── llava/           # LLaVA utilities
-└── .claude/             # Claude Code settings
+└── config/              # ⚙️ Service configurations
+    ├── bentoml.yaml     # Server config
+    └── bentofiles/      # Service build configs
 ```
 
 ## 🎨 Example Usage
@@ -112,13 +126,55 @@ curl -X POST http://127.0.0.1:3000/analyze_image \
   }' | jq '.response'
 ```
 
+## 🧪 Testing Your Services
+
+### Recommended: pytest (Official BentoML Testing)
+
+**Using the test script (easiest):**
+```bash
+./scripts/test.sh                    # Fast tests only
+./scripts/test.sh --all              # All tests including slow integration  
+./scripts/test.sh --coverage         # Fast tests with coverage
+./scripts/test.sh --service example  # Test specific service
+./scripts/test.sh --unit             # Unit tests only
+./scripts/test.sh --help             # Show all options
+```
+
+**Direct UV commands:**
+```bash
+# Run all fast tests (unit + behavior)
+uv run pytest -m "not slow"
+
+# Run all tests including slow integration tests
+uv run pytest
+
+# Run specific service tests
+uv run pytest tests/test_example_service.py
+
+# Run with coverage report
+uv run pytest --cov=. --cov-report=term-missing
+```
+
+### Legacy: Bash Scripts (Deprecated)
+```bash
+./scripts/test_service.sh          # Basic service test
+./scripts/test_llava.sh           # LLaVA service test
+./scripts/test_multi_service.sh   # Multi-service test
+```
+
+**✨ The pytest suite includes:**
+- **Unit Tests** - Test individual methods with mocked dependencies
+- **Integration Tests** - Test actual service startup and API endpoints
+- **HTTP Behavior Tests** - Test response formats and error handling
+- **62% Code Coverage** - Comprehensive test coverage across all services
+
 ## ⚡ Key Features
 
 - **🍎 Apple Silicon Optimized** - Uses MPS backend with float32 for stability
 - **💾 External Drive Support** - Custom HF_HOME for model storage
 - **🔄 Auto Device Detection** - MPS → CUDA → CPU fallback
 - **📊 Structured Output** - JSON schema validation for LLaVA
-- **🧪 Comprehensive Testing** - Dedicated test scripts for all services
+- **🧪 Professional Testing** - pytest-based test suite following BentoML best practices
 - **📈 Modular Architecture** - Reusable utilities for easy extension
 
 ## 🛠️ Requirements

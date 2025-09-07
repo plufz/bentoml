@@ -100,6 +100,9 @@ testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+]
 addopts = [
     "--strict-markers",
     "--disable-warnings", 
@@ -107,3 +110,4 @@ addopts = [
     "--cov-report=term-missing",
     "--cov-report=html:htmlcov",
 ]
+pythonpath = ["."]

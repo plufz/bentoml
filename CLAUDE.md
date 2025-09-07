@@ -143,10 +143,74 @@ Core dependencies managed by UV:
 
 ## Testing
 
-- All scripts automatically set PATH for UV
+### Pytest (Recommended - Official BentoML Testing)
+
+**Framework**: `pytest` with comprehensive test coverage using official BentoML testing patterns.
+
+**Test Structure**:
+- `tests/` - Main test directory
+- `tests/conftest.py` - Shared fixtures and configuration
+- `tests/test_*.py` - Individual service test files
+
+**Test Types**:
+1. **Unit Tests** - Test individual service methods with mocked dependencies
+2. **Integration Tests** - Test actual service startup and API endpoints  
+3. **HTTP Behavior Tests** - Test API response formats and error handling
+4. **End-to-End Tests** - Test full service workflows (marked as slow)
+
+**Running Tests**:
+
+*Using the test script (recommended):*
+```bash
+./scripts/test.sh                    # Fast tests only
+./scripts/test.sh --all              # All tests including slow integration  
+./scripts/test.sh --coverage         # Fast tests with coverage
+./scripts/test.sh --service example  # Test specific service
+./scripts/test.sh --unit             # Unit tests only
+./scripts/test.sh --help             # Show all options
+```
+
+*Direct UV commands:*
+```bash
+# Run all tests
+uv run pytest
+
+# Run specific test file
+uv run pytest tests/test_example_service.py
+
+# Run only fast tests (exclude slow integration tests)
+uv run pytest -m "not slow"
+
+# Run with coverage report
+uv run pytest --cov=. --cov-report=term-missing
+
+# Run specific test types
+uv run pytest tests/test_example_service.py::TestHelloServiceUnit
+```
+
+**Test Configuration**:
+- Configured in `pyproject.toml` with test discovery patterns
+- Coverage reporting to console and HTML
+- Slow tests marked with `@pytest.mark.slow` for optional skipping
+- Automatic mock setup for services to avoid model loading during unit tests
+
+**Available Test Files**:
+- `test_example_service.py` - Hello service unit and integration tests
+- `test_llava_service.py` - Vision-language service tests with image processing
+- `test_stable_diffusion_service.py` - Image generation service tests
+- `test_whisper_service.py` - Audio transcription service tests
+- `test_multi_service.py` - Multi-service composition tests
+
+### Legacy Bash Scripts (Deprecated)
+
+- `./scripts/test_service.sh` - Basic service testing script
+- `./scripts/test_llava.sh` - LLaVA service testing script  
+- `./scripts/test_multi_service.sh` - Multi-service testing script
 - Health check: `POST /health` with `{}`
 - Example endpoint: `POST /hello` with `{"request": {"name": "value"}}`
 - Web interface available at service root URL
+
+**Migration Note**: Bash scripts are kept for development convenience but pytest is the recommended testing approach following BentoML best practices.
 
 ## Documentation Index
 
