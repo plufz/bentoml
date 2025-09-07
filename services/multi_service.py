@@ -13,12 +13,14 @@ from services.example_service import HelloService
 from services.stable_diffusion_service import StableDiffusionService
 from services.llava_service import LLaVAService
 from services.whisper_service import WhisperService
+from services.upscaler_service import PhotoUpscalerService
 
 # Import request models from individual services
 from services.example_service import HelloRequest
 from services.stable_diffusion_service import ImageGenerationRequest
 from services.llava_service import VisionLanguageRequest, VisionLanguageUrlRequest
 from services.whisper_service import TranscribeUrlRequest
+from services.upscaler_service import UpscaleUrlRequest
 
 
 class ServiceInfo(BaseModel):
@@ -58,6 +60,7 @@ class MultiService:
     - Stable Diffusion: Text-to-image generation
     - LLaVA: Vision-language understanding and analysis
     - Whisper: Audio transcription from files and URLs
+    - Photo Upscaler: AI-powered photo upscaling with Real-ESRGAN
     """
     
     def __init__(self):
@@ -89,6 +92,13 @@ class MultiService:
         except Exception as e:
             print(f"⚠️  Whisper Service failed to initialize: {e}")
             self.whisper_service = None
+            
+        try:
+            self.upscaler_service = PhotoUpscalerService()
+            print("✅ Photo Upscaler Service initialized")
+        except Exception as e:
+            print(f"⚠️  Photo Upscaler Service failed to initialize: {e}")
+            self.upscaler_service = None
     
     @bentoml.api
     def health(self) -> Dict[str, Any]:
@@ -141,6 +151,16 @@ class MultiService:
         else:
             services_status["whisper"] = {"status": "unavailable"}
             overall_healthy = False
+            
+        if self.upscaler_service:
+            try:
+                services_status["upscaler"] = self.upscaler_service.health()
+            except Exception as e:
+                services_status["upscaler"] = {"status": "error", "error": str(e)}
+                overall_healthy = False
+        else:
+            services_status["upscaler"] = {"status": "unavailable"}
+            overall_healthy = False
         
         return {
             "status": "healthy" if overall_healthy else "degraded",
@@ -184,6 +204,14 @@ class MultiService:
                 "name": "Whisper",
                 "description": "Audio transcription from files and URLs",
                 "endpoints": ["/transcribe_file", "/transcribe_url"],
+                "status": "available"
+            })
+        
+        if self.upscaler_service:
+            services.append({
+                "name": "Photo Upscaler",
+                "description": "AI-powered photo upscaling with Real-ESRGAN",
+                "endpoints": ["/upscale_file", "/upscale_url"],
                 "status": "available"
             })
         
@@ -247,3 +275,18 @@ class MultiService:
         if not self.whisper_service:
             return {"error": "Whisper service is not available", "status": "error"}
         return self.whisper_service.transcribe_url(request)
+    
+    # Photo Upscaler Endpoints
+    @bentoml.api
+    def upscale_file(self, image_file: Path, scale_factor: float = 2.0, face_enhance: bool = False, output_format: str = "PNG", quality: int = 95) -> Dict[str, Any]:
+        """Upscale uploaded image file using Real-ESRGAN"""
+        if not self.upscaler_service:
+            return {"error": "Photo Upscaler service is not available", "status": "error"}
+        return self.upscaler_service.upscale_file(image_file, scale_factor, face_enhance, output_format, quality)
+    
+    @bentoml.api
+    def upscale_url(self, request: UpscaleUrlRequest) -> Dict[str, Any]:
+        """Upscale image from URL using Real-ESRGAN"""
+        if not self.upscaler_service:
+            return {"error": "Photo Upscaler service is not available", "status": "error"}
+        return self.upscaler_service.upscale_url(request)

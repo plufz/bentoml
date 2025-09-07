@@ -22,6 +22,11 @@ description: |
   - **Description**: Accurate speech-to-text transcription
   - **Model**: MLX Whisper Large v3 Turbo
   
+  ### 📸 **Photo Upscaler** - AI Image Enhancement
+  - **Endpoints**: `/upscale_file`, `/upscale_url`
+  - **Description**: AI-powered photo upscaling with Real-ESRGAN
+  - **Model**: Real-ESRGAN x4plus with optional GFPGAN face enhancement
+  
   ### 👋 **Hello Service** - Health & Testing
   - **Endpoint**: `/hello`
   - **Description**: Simple greeting service for testing and health checks
@@ -40,7 +45,7 @@ labels:
   stage: production
   type: multi-service
   version: "1.0.0"
-  services: "hello,stable-diffusion,llava,whisper"
+  services: "hello,stable-diffusion,llava,whisper,upscaler"
 
 include:
   - "services/"
@@ -82,6 +87,10 @@ python:
     # Whisper (MLX)
     - "mlx-whisper"
     - "pydub>=0.25.1"
+    
+    # Photo Upscaler
+    - "realesrgan>=0.3.0"
+    - "gfpgan>=1.3.8"
     
     # Audio processing
     - "librosa>=0.9.0"
