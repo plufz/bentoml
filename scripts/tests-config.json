@@ -1,0 +1,76 @@
+{
+  "test_services": [
+    {
+      "name": "example",
+      "display_name": "Example Service",
+      "test_file": "tests/test_example_service.py",
+      "description": "Basic hello service functionality"
+    },
+    {
+      "name": "llava",
+      "display_name": "LLaVA Service",
+      "test_file": "tests/test_llava_service.py", 
+      "description": "Vision-language understanding tests"
+    },
+    {
+      "name": "stable_diffusion",
+      "aliases": ["sd"],
+      "display_name": "Stable Diffusion Service",
+      "test_file": "tests/test_stable_diffusion_service.py",
+      "description": "Image generation service tests"
+    },
+    {
+      "name": "whisper",
+      "display_name": "Whisper Service", 
+      "test_file": "tests/test_whisper_service.py",
+      "description": "Audio transcription service tests"
+    },
+    {
+      "name": "upscaler",
+      "display_name": "Photo Upscaler Service",
+      "test_file": "tests/test_upscaler_service.py",
+      "description": "AI photo upscaling tests"
+    },
+    {
+      "name": "multi",
+      "display_name": "Multi-Service",
+      "test_file": "tests/test_multi_service.py",
+      "description": "Unified multi-service composition tests"
+    },
+    {
+      "name": "rag",
+      "display_name": "RAG Service",
+      "test_file": "tests/test_rag_service.py",
+      "description": "Document ingestion and RAG tests"
+    }
+  ],
+  "test_types": [
+    {
+      "name": "unit",
+      "display_name": "Unit Tests",
+      "pytest_marker": "Unit",
+      "description": "Fast isolated unit tests"
+    },
+    {
+      "name": "behavior", 
+      "display_name": "Behavior Tests",
+      "pytest_marker": "Behavior",
+      "description": "HTTP behavior and API tests"
+    },
+    {
+      "name": "integration",
+      "display_name": "Integration Tests", 
+      "pytest_marker": "Integration",
+      "description": "Full service integration tests (slow)",
+      "requires_all_flag": true
+    }
+  ],
+  "default_excludes": [
+    "-m", "not slow"
+  ],
+  "pytest_options": {
+    "short_traceback": ["--tb=short"],
+    "coverage_basic": ["--cov=.", "--cov-report=term-missing", "--cov-report=html:htmlcov"],
+    "verbose": ["-v"]
+  }
+}

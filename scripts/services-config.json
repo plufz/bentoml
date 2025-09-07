@@ -1,0 +1,46 @@
+{
+  "services": [
+    {
+      "name": "Example Service",
+      "service_file": "services/example_service.py",
+      "bentofile": null,
+      "description": "Simple greeting and health check service"
+    },
+    {
+      "name": "Stable Diffusion Service",
+      "service_file": "services/stable_diffusion_service.py", 
+      "bentofile": "config/bentofiles/stable-diffusion.yaml",
+      "description": "Text-to-image generation using Stable Diffusion"
+    },
+    {
+      "name": "LLaVA Service",
+      "service_file": "services/llava_service.py",
+      "bentofile": "config/bentofiles/llava.yaml",
+      "description": "Vision-language understanding and image analysis"
+    },
+    {
+      "name": "Whisper Service",
+      "service_file": "services/whisper_service.py",
+      "bentofile": "config/bentofiles/whisper.yaml",
+      "description": "Audio transcription from files and URLs"
+    },
+    {
+      "name": "Photo Upscaler Service",
+      "service_file": "services/upscaler_service.py",
+      "bentofile": "config/bentofiles/upscaler.yaml", 
+      "description": "AI-powered photo upscaling with Real-ESRGAN"
+    },
+    {
+      "name": "RAG Service",
+      "service_file": "services/rag_service.py",
+      "bentofile": "config/bentofiles/rag.yaml",
+      "description": "Document ingestion and question-answering system"
+    },
+    {
+      "name": "Multi-Service",
+      "service_file": "services/multi_service.py",
+      "bentofile": "config/bentofiles/multi-service.yaml",
+      "description": "Unified deployment with all services"
+    }
+  ]
+}

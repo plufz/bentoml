@@ -1,0 +1,140 @@
+{
+  "system_endpoints": [
+    {
+      "name": "health",
+      "description": "Health check",
+      "example_payload": "{}",
+      "is_system": true
+    },
+    {
+      "name": "info", 
+      "description": "Service information",
+      "example_payload": "{}",
+      "is_system": true
+    }
+  ],
+  "service_endpoints": [
+    {
+      "service": "Hello Service",
+      "endpoints": [
+        {
+          "name": "hello",
+          "description": "Simple greeting",
+          "example_payload": "{\"name\": \"World\"}",
+          "example_description": "Basic greeting with custom name"
+        }
+      ]
+    },
+    {
+      "service": "Stable Diffusion",
+      "endpoints": [
+        {
+          "name": "generate_image",
+          "description": "Generate image from text prompt", 
+          "example_payload": "{\"prompt\": \"A beautiful sunset\", \"width\": 512, \"height\": 512}",
+          "example_description": "Text-to-image generation",
+          "is_image_endpoint": true
+        }
+      ]
+    },
+    {
+      "service": "LLaVA Vision",
+      "endpoints": [
+        {
+          "name": "analyze_image",
+          "description": "Analyze uploaded image (base64/bytes)",
+          "example_payload": "{\"image\": \"base64...\", \"prompt\": \"What is in this image?\"}",
+          "example_description": "Image analysis with base64 data"
+        },
+        {
+          "name": "analyze_image_url",
+          "description": "Analyze image from URL",
+          "example_payload": "{\"image_url\": \"https://plufz.com/test-assets/test-office.jpg\", \"prompt\": \"What is in this image?\"}",
+          "example_description": "Image analysis from URL"
+        },
+        {
+          "name": "example_schemas",
+          "description": "Get example JSON schemas",
+          "example_payload": "{}",
+          "example_description": "Get structured analysis schemas"
+        }
+      ]
+    },
+    {
+      "service": "Whisper Audio",
+      "endpoints": [
+        {
+          "name": "transcribe_file",
+          "description": "Transcribe uploaded audio file",
+          "example_payload": "multipart",
+          "example_description": "Audio transcription from file upload",
+          "requires_file": true
+        },
+        {
+          "name": "transcribe_url",
+          "description": "Transcribe audio from URL",
+          "example_payload": "{\"url\": \"https://plufz.com/test-assets/test-english.mp3\"}",
+          "example_description": "Audio transcription from URL"
+        }
+      ]
+    },
+    {
+      "service": "Photo Upscaler",
+      "endpoints": [
+        {
+          "name": "upscale_file",
+          "description": "Upscale uploaded image file",
+          "example_payload": "multipart",
+          "example_description": "Photo upscaling from file upload",
+          "requires_file": true,
+          "is_image_endpoint": true
+        },
+        {
+          "name": "upscale_url", 
+          "description": "Upscale image from URL",
+          "example_payload": "{\"url\": \"https://plufz.com/test-assets/test-office.jpg\", \"scale_factor\": 2.0}",
+          "example_description": "Photo upscaling from URL",
+          "is_image_endpoint": true
+        }
+      ]
+    },
+    {
+      "service": "RAG Service",
+      "endpoints": [
+        {
+          "name": "rag_ingest_text",
+          "description": "Ingest text document into RAG system",
+          "example_payload": "{\"text\": \"This is a test document about AI and machine learning.\", \"metadata\": {\"source\": \"test\"}}",
+          "example_description": "Ingest plain text document"
+        },
+        {
+          "name": "rag_ingest_pdf",
+          "description": "Ingest PDF file into RAG system", 
+          "example_payload": "multipart",
+          "example_description": "Ingest PDF document",
+          "requires_file": true
+        },
+        {
+          "name": "rag_ingest_txt_file",
+          "description": "Ingest text file into RAG system",
+          "example_payload": "multipart", 
+          "example_description": "Ingest text file",
+          "requires_file": true
+        },
+        {
+          "name": "rag_query",
+          "description": "Query the RAG system",
+          "example_payload": "{\"query\": \"What is machine learning?\", \"max_tokens\": 512, \"temperature\": 0.1}",
+          "example_description": "Ask questions about ingested documents"
+        },
+        {
+          "name": "rag_clear_index",
+          "description": "Clear all documents from RAG index",
+          "example_payload": "{}",
+          "example_description": "Remove all ingested documents"
+        }
+      ]
+    }
+  ],
+  "image_processing_note": "Image endpoints (generate_image, upscale_*) automatically extract base64 image data and save to endpoint_images/ directory."
+}
