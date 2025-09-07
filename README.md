@@ -77,8 +77,11 @@ Use the endpoint testing script for interactive API testing:
 # Test Stable Diffusion image generation
 ./scripts/endpoint.sh generate_image '{"prompt": "A beautiful sunset", "width": 512, "height": 512}'
 
-# Test LLaVA image analysis
-./scripts/endpoint.sh analyze_image '{"image_data": "base64...", "query": "What is in this image?"}'
+# Test LLaVA image analysis (base64/bytes)
+./scripts/endpoint.sh analyze_image '{"image": "base64...", "prompt": "What is in this image?"}'
+
+# Test LLaVA image analysis from URL
+./scripts/endpoint.sh analyze_image_url '{"image_url": "https://plufz.com/test-assets/test-office.jpg", "prompt": "What is in this image?"}'
 
 # Test Whisper audio transcription
 ./scripts/endpoint.sh transcribe_url '{"url": "https://plufz.com/test-assets/test-english.mp3"}'
