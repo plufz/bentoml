@@ -171,7 +171,11 @@ Services expect nested JSON payloads:
 
 ## Configuration
 
-- **Server**: Runs on `127.0.0.1:3000` by default
+Environment variables (set in `.env` file):
+- **BENTOML_HOST**: Server host (default: `127.0.0.1`)
+- **BENTOML_PORT**: Server port (default: `3000`)
+- **BENTOML_PROTOCOL**: Server protocol (default: `http`)
+- **Service Ports**: Individual service ports for testing (`EXAMPLE_SERVICE_PORT`, `LLAVA_SERVICE_PORT`, etc.)
 - **Storage**: Uses local filesystem (`./bentos`, `./models`)
 - **Development**: Auto-reload enabled, web interface at root `/`
 - **HuggingFace Cache**: Custom location at `/Volumes/Second/huggingface` (not default `~/.cache/huggingface`)
