@@ -24,6 +24,15 @@ class VisionLanguageRequest(BaseModel):
     max_new_tokens: Optional[int] = Field(None, ge=1, le=2048, description="Maximum tokens to generate")
 
 
+class VisionLanguageUrlRequest(BaseModel):
+    prompt: str = Field(..., description="Text prompt or question about the image")
+    image_url: str = Field(..., description="URL of the image to analyze")
+    json_schema: Optional[Dict[str, Any]] = Field(None, description="Optional JSON schema for structured output")
+    include_raw_response: bool = Field(False, description="Include raw model response in output")
+    temperature: Optional[float] = Field(None, ge=0.0, le=2.0, description="Generation temperature (0.0-2.0)")
+    max_new_tokens: Optional[int] = Field(None, ge=1, le=2048, description="Maximum tokens to generate")
+
+
 @bentoml.service(
     resources={"memory": "4Gi"},
     traffic={"timeout": 120}
@@ -41,27 +50,34 @@ class LLaVAService:
         # Store device info for API responses
         self.device = self.pipeline_manager.device
     
-    @bentoml.api
-    def analyze_image(self, request: VisionLanguageRequest) -> Dict[str, Any]:
+    def _process_image_analysis(self, image: Union[str, bytes], prompt: str, 
+                               json_schema: Optional[Dict[str, Any]] = None,
+                               include_raw_response: bool = False,
+                               temperature: Optional[float] = None,
+                               max_new_tokens: Optional[int] = None) -> Dict[str, Any]:
         """
-        Analyze image with text prompt and optional structured JSON output
+        Core image analysis processing logic shared between endpoints
         
         Args:
-            request: Vision-language request with image, prompt, and optional JSON schema
+            image: Image as URL, base64 string, or bytes
+            prompt: Text prompt or question about the image
+            json_schema: Optional JSON schema for structured output
+            include_raw_response: Include raw model response in output
+            temperature: Generation temperature
+            max_new_tokens: Maximum tokens to generate
             
         Returns:
-            Dict containing analysis results, either as structured JSON or raw text
+            Dict containing analysis results
         """
-        
         # Validate inputs
-        if not validate_image_format(request.image):
+        if not validate_image_format(image):
             return {
                 "success": False,
                 "error": "Invalid image format. Supported: URL, base64, or image bytes",
                 "format": "error"
             }
         
-        if request.json_schema and not validate_json_schema(request.json_schema):
+        if json_schema and not validate_json_schema(json_schema):
             return {
                 "success": False,
                 "error": "Invalid JSON schema provided",
@@ -72,24 +88,24 @@ class LLaVAService:
         original_max_tokens = self.pipeline_manager.max_new_tokens
         original_temperature = self.pipeline_manager.temperature
         
-        if request.max_new_tokens:
-            self.pipeline_manager.max_new_tokens = request.max_new_tokens
-        if request.temperature is not None:
-            self.pipeline_manager.temperature = request.temperature
+        if max_new_tokens:
+            self.pipeline_manager.max_new_tokens = max_new_tokens
+        if temperature is not None:
+            self.pipeline_manager.temperature = temperature
         
         try:
             # Generate structured response
             result = self.pipeline_manager.generate_structured_response(
-                image=request.image,
-                prompt=request.prompt,
-                json_schema=request.json_schema,
-                include_raw_response=request.include_raw_response
+                image=image,
+                prompt=prompt,
+                json_schema=json_schema,
+                include_raw_response=include_raw_response
             )
             
             # Add request metadata
             result.update({
-                "input_prompt": request.prompt,
-                "has_json_schema": request.json_schema is not None,
+                "input_prompt": prompt,
+                "has_json_schema": json_schema is not None,
                 "device_used": self.device,
             })
             
@@ -109,6 +125,46 @@ class LLaVAService:
             self.pipeline_manager.temperature = original_temperature
     
     @bentoml.api
+    def analyze_image(self, request: VisionLanguageRequest) -> Dict[str, Any]:
+        """
+        Analyze image with text prompt and optional structured JSON output
+        
+        Args:
+            request: Vision-language request with image, prompt, and optional JSON schema
+            
+        Returns:
+            Dict containing analysis results, either as structured JSON or raw text
+        """
+        return self._process_image_analysis(
+            image=request.image,
+            prompt=request.prompt,
+            json_schema=request.json_schema,
+            include_raw_response=request.include_raw_response,
+            temperature=request.temperature,
+            max_new_tokens=request.max_new_tokens
+        )
+    
+    @bentoml.api
+    def analyze_image_url(self, request: VisionLanguageUrlRequest) -> Dict[str, Any]:
+        """
+        Analyze image from URL with text prompt and optional structured JSON output
+        
+        Args:
+            request: Vision-language request with image URL, prompt, and optional JSON schema
+            
+        Returns:
+            Dict containing analysis results, either as structured JSON or raw text
+        """
+        return self._process_image_analysis(
+            image=request.image_url,
+            prompt=request.prompt,
+            json_schema=request.json_schema,
+            include_raw_response=request.include_raw_response,
+            temperature=request.temperature,
+            max_new_tokens=request.max_new_tokens
+        )
+    
+    @bentoml.api
     def health(self) -> Dict[str, Any]:
         """Health check endpoint"""
         health_info = self.pipeline_manager.get_health_status()
@@ -117,6 +173,7 @@ class LLaVAService:
             "version": "1.0.0",
             "capabilities": [
                 "image_analysis",
+                "image_url_analysis",
                 "visual_question_answering", 
                 "structured_json_output",
                 "multimodal_chat"

@@ -136,6 +136,50 @@ class TestLLaVAServiceUnit:
         assert result["format"] == "error"
     
     @patch('services.llava_service.LLaVALlamaCppPipelineManager')
+    @patch('services.llava_service.validate_image_format')
+    @patch('services.llava_service.validate_json_schema')
+    def test_analyze_image_url_method_success(self, mock_validate_schema, mock_validate_image, mock_pipeline):
+        """Test analyze_image_url method with successful processing"""
+        from services.llava_service import LLaVAService, VisionLanguageUrlRequest
+        
+        # Setup mocks
+        mock_validate_image.return_value = True
+        mock_validate_schema.return_value = True
+        
+        mock_pipeline_instance = MagicMock()
+        mock_pipeline_instance.device = "cpu"
+        mock_pipeline_instance.max_new_tokens = 512
+        mock_pipeline_instance.temperature = 0.1
+        mock_pipeline_instance.generate_structured_response.return_value = {
+            "success": True,
+            "response": "I see an image from URL",
+            "format": "text"
+        }
+        mock_pipeline.return_value = mock_pipeline_instance
+        
+        service = LLaVAService()
+        request = VisionLanguageUrlRequest(
+            prompt="What do you see?",
+            image_url="https://example.com/test.jpg"
+        )
+        
+        result = service.analyze_image_url(request)
+        
+        assert result["success"] is True
+        assert result["response"] == "I see an image from URL"
+        assert result["input_prompt"] == "What do you see?"
+        assert result["device_used"] == "cpu"
+        assert result["has_json_schema"] is False
+        
+        # Verify the pipeline was called with the URL
+        mock_pipeline_instance.generate_structured_response.assert_called_once_with(
+            image="https://example.com/test.jpg",
+            prompt="What do you see?",
+            json_schema=None,
+            include_raw_response=False
+        )
+    
+    @patch('services.llava_service.LLaVALlamaCppPipelineManager')
     def test_health_method(self, mock_pipeline):
         """Test health method"""
         from services.llava_service import LLaVAService

@@ -17,7 +17,7 @@ from services.whisper_service import WhisperService
 # Import request models from individual services
 from services.example_service import HelloRequest
 from services.stable_diffusion_service import ImageGenerationRequest
-from services.llava_service import VisionLanguageRequest
+from services.llava_service import VisionLanguageRequest, VisionLanguageUrlRequest
 from services.whisper_service import TranscribeUrlRequest
 
 
@@ -175,7 +175,7 @@ class MultiService:
             services.append({
                 "name": "LLaVA",
                 "description": "Vision-language understanding and image analysis",
-                "endpoints": ["/analyze_image", "/analyze_structured", "/analyze_url", "/example_schemas"],
+                "endpoints": ["/analyze_image", "/analyze_image_url", "/example_schemas"],
                 "status": "available"
             })
         
@@ -220,18 +220,11 @@ class MultiService:
         return self.llava_service.analyze_image(request)
     
     @bentoml.api
-    def analyze_structured(self, request: VisionLanguageRequest) -> Dict[str, Any]:
-        """Analyze image with structured JSON output using LLaVA"""
-        if not self.llava_service:
-            return {"error": "LLaVA service is not available", "status": "error"}
-        return self.llava_service.analyze_structured(request)
-    
-    @bentoml.api
-    def analyze_url(self, request: VisionLanguageRequest) -> Dict[str, Any]:
+    def analyze_image_url(self, request: VisionLanguageUrlRequest) -> Dict[str, Any]:
         """Analyze image from URL using LLaVA"""
         if not self.llava_service:
             return {"error": "LLaVA service is not available", "status": "error"}
-        return self.llava_service.analyze_url(request)
+        return self.llava_service.analyze_image_url(request)
     
     @bentoml.api
     def example_schemas(self) -> Dict[str, Any]:
