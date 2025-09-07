@@ -22,8 +22,10 @@ This is a BentoML local development setup configured to run on macOS without Doc
 - `services/stable_diffusion_service.py` - Stable Diffusion image generation service
 - `services/llava_service.py` - LLaVA vision-language service using llama-cpp-python
 - `services/whisper_service.py` - Whisper audio transcription service
+- `services/multi_service.py` - Multi-service composition with unified endpoints
 - `scripts/test_llava.sh` - LLaVA service testing script
 - `scripts/test_whisper.sh` - Whisper service testing script
+- `scripts/test_multi_service.sh` - Multi-service comprehensive testing script
 
 ## Development Workflow
 
@@ -60,12 +62,33 @@ BENTOFILE=config/bentofiles/whisper.yaml ./scripts/run_bentoml.sh build services
 BENTOFILE=config/bentofiles/llava.yaml ./scripts/run_bentoml.sh build services/llava_service.py
 ```
 
+### Multi-Service Architecture
+
+For unified deployment, use the multi-service composition:
+```bash
+# Serve all services in a single unified endpoint
+BENTOFILE=config/bentofiles/multi-service.yaml ./scripts/run_bentoml.sh serve services.multi_service:MultiService
+
+# Test all services in the multi-service
+./scripts/test_multi_service.sh
+```
+
+**Multi-Service Endpoints:**
+- System: `/health`, `/info`
+- Hello Service: `/hello`
+- Stable Diffusion: `/generate_image`
+- LLaVA: `/analyze_image`, `/analyze_structured`, `/analyze_url`, `/example_schemas`
+- Whisper: `/transcribe_file`, `/transcribe_url`
+
+**Total: 10 endpoints in a single service** 🚀
+
 ### Testing Services
 
 Each service has its own test script:
 ```bash
-./scripts/test_llava.sh        # Test LLaVA service
-./scripts/test_service.sh      # Test general services
+./scripts/test_llava.sh          # Test LLaVA service
+./scripts/test_service.sh        # Test general services
+./scripts/test_multi_service.sh  # Test all services in multi-service
 ```
 
 ## BentoML Service Pattern

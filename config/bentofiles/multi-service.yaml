@@ -1,0 +1,116 @@
+service: "services.multi_service:MultiService"
+
+description: |
+  # Multi-Service BentoML Application 🚀
+  
+  A comprehensive AI service that combines multiple specialized models into a single unified API endpoint.
+  
+  ## Available Services
+  
+  ### 🖼️ **Stable Diffusion** - Text-to-Image Generation
+  - **Endpoint**: `/generate_image`
+  - **Description**: Generate high-quality images from text prompts
+  - **Model**: Stable Diffusion v1.5 optimized for MPS
+  
+  ### 👁️ **LLaVA** - Vision-Language Understanding  
+  - **Endpoints**: `/analyze_image`, `/analyze_structured`, `/analyze_url`, `/example_schemas`
+  - **Description**: Advanced image analysis with natural language understanding
+  - **Model**: LLaVA 1.6 Mistral 7B GGUF quantized
+  
+  ### 🎧 **Whisper** - Audio Transcription
+  - **Endpoints**: `/transcribe_file`, `/transcribe_url`  
+  - **Description**: Accurate speech-to-text transcription
+  - **Model**: MLX Whisper Large v3 Turbo
+  
+  ### 👋 **Hello Service** - Health & Testing
+  - **Endpoint**: `/hello`
+  - **Description**: Simple greeting service for testing and health checks
+  
+  ## System Endpoints
+  - **`/health`**: Overall health check for all services
+  - **`/info`**: Detailed information about available services and endpoints
+  
+  ## Resource Requirements
+  - **GPU**: 1x NVIDIA L4 or similar (MPS on macOS)
+  - **Memory**: 8GB+ recommended for all models
+  - **CPU**: 4+ cores for optimal performance
+
+labels:
+  owner: bentoml-team
+  stage: production
+  type: multi-service
+  version: "1.0.0"
+  services: "hello,stable-diffusion,llava,whisper"
+
+include:
+  - "services/"
+  - "test-assets/"
+  - "config/"
+
+exclude:
+  - "docs/"
+  - "scripts/"
+  - "*.md"
+  - ".git*"
+  - "__pycache__/"
+  - "*.pyc"
+  - ".DS_Store"
+
+python:
+  packages:
+    # Core BentoML and API
+    - "bentoml[io]>=1.4.0"
+    - "fastapi>=0.100.0"
+    - "pydantic>=2.5.0"
+    - "uvicorn[standard]>=0.18.0"
+    
+    # Data processing
+    - "pandas>=1.3.0"
+    - "numpy>=1.21.0"
+    - "pillow>=10.0.0"
+    - "requests>=2.28.0"
+    
+    # AI/ML frameworks
+    - "torch>=2.1.0"
+    - "torchvision>=0.16.0"
+    - "transformers>=4.30.0"
+    - "accelerate>=0.25.0"
+    
+    # Stable Diffusion
+    - "diffusers>=0.25.0"
+    
+    # LLaVA (MLX and llama-cpp)
+    - "llama-cpp-python>=0.2.27"
+    
+    # Whisper (MLX)
+    - "mlx-whisper"
+    - "pydub>=0.25.1"
+    
+    # Audio processing
+    - "librosa>=0.9.0"
+    - "soundfile>=0.12.0"
+    
+    # JSON and utilities
+    - "orjson>=3.8.0"
+    - "jsonschema>=4.17.0"
+  
+  lock_packages: true
+
+envs:
+  - name: "HF_HOME"
+    value: "/Volumes/Second/huggingface"
+  - name: "TRANSFORMERS_CACHE" 
+    value: "/Volumes/Second/huggingface/hub"
+  - name: "HUGGINGFACE_HUB_CACHE"
+    value: "/Volumes/Second/huggingface/hub"
+  - name: "PYTORCH_ENABLE_MPS_FALLBACK"
+    value: "1"
+  - name: "PYTORCH_MPS_HIGH_WATERMARK_RATIO"
+    value: "0.0"
+
+docker:
+  distro: debian
+  python_version: "3.11"
+  cuda_version: "12.1"
+  env:
+    - "PYTHONPATH=/opt/bentoml"
