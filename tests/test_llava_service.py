@@ -240,14 +240,19 @@ class TestLLaVAServiceIntegration:
     def running_llava_service(self) -> Generator[str, None, None]:
         """Start LLaVA service - may be slow due to model loading"""
         try:
+            from tests.conftest import get_service_url
+            import os
+            
+            # Get service configuration from environment
+            port = os.getenv("LLAVA_SERVICE_PORT", "3002")
+            base_url = get_service_url("llava", port)
+            
             process = subprocess.Popen([
                 "uv", "run", "bentoml", "serve",
                 "services.llava_service:LLaVAService", 
-                "--port", "3002",
+                "--port", port,
                 "--reload"
             ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            
-            base_url = "http://127.0.0.1:3002"
             max_attempts = 60  # Extended timeout for model loading
             for _ in range(max_attempts):
                 try:

@@ -172,14 +172,17 @@ class TestStableDiffusionServiceIntegration:
     def running_sd_service(self) -> Generator[str, None, None]:
         """Start Stable Diffusion service - may be slow due to model loading"""
         try:
+            from tests.conftest import get_service_url
+            import os
+            port = os.getenv("STABLE_DIFFUSION_SERVICE_PORT", "3001")
+            base_url = get_service_url("stable_diffusion", port)
+            
             process = subprocess.Popen([
                 "uv", "run", "bentoml", "serve",
                 "services.stable_diffusion_service:StableDiffusionService",
-                "--port", "3003", 
+                "--port", port, 
                 "--reload"
             ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            
-            base_url = "http://127.0.0.1:3003"
             max_attempts = 120  # Extended timeout for model loading (up to 4 minutes)
             for _ in range(max_attempts):
                 try:

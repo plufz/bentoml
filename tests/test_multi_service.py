@@ -200,8 +200,14 @@ class TestMultiServiceIntegration:
     def running_multi_service(self) -> Generator[str, None, None]:
         """Start MultiService - very slow due to all model loading"""
         try:
+            from tests.conftest import get_service_url
+            import os
+            
+            # Get service configuration from environment
+            port = os.getenv("MULTI_SERVICE_PORT", "3003")
+            base_url = get_service_url("multi", port)
+            
             # Check if service is already running from background command
-            base_url = "http://127.0.0.1:3000"
             try:
                 response = requests.post(f"{base_url}/health", json={}, timeout=5)
                 if response.status_code == 200:
@@ -214,7 +220,7 @@ class TestMultiServiceIntegration:
             process = subprocess.Popen([
                 "uv", "run", "bentoml", "serve",
                 "services.multi_service:MultiService",
-                "--port", "3000",
+                "--port", port,
                 "--reload"
             ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             

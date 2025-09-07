@@ -179,14 +179,17 @@ class TestWhisperServiceIntegration:
     def running_whisper_service(self) -> Generator[str, None, None]:
         """Start Whisper service - may be slow due to model loading"""
         try:
+            from tests.conftest import get_service_url
+            import os
+            port = os.getenv("WHISPER_SERVICE_PORT", "3004")
+            base_url = get_service_url("whisper", port)
+            
             process = subprocess.Popen([
                 "uv", "run", "bentoml", "serve",
                 "services.whisper_service:WhisperService",
-                "--port", "3004",
+                "--port", port,
                 "--reload"
             ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            
-            base_url = "http://127.0.0.1:3004"
             max_attempts = 60  # Extended timeout for model loading
             for _ in range(max_attempts):
                 try:
