@@ -60,6 +60,35 @@ The service will automatically start on boot and restart if it crashes.
 | **LLaVA Vision** | Image + Text → JSON analysis | `BENTOFILE=bentofile_llava.yaml ./scripts/run_bentoml.sh build services/llava_service.py` |
 | **Example** | Simple API for testing | `./scripts/run_bentoml.sh build services/example_service.py` |
 
+### Testing Endpoints
+
+Use the endpoint testing script for interactive API testing:
+
+```bash
+# Test health check
+./scripts/endpoint.sh health '{}'
+
+# Test hello service with custom name
+./scripts/endpoint.sh hello '{"name": "BentoML"}'
+
+# Test with empty payload (uses defaults)
+./scripts/endpoint.sh hello '{}'
+
+# Test Stable Diffusion image generation
+./scripts/endpoint.sh generate_image '{"prompt": "A beautiful sunset", "width": 512, "height": 512}'
+
+# Test LLaVA image analysis
+./scripts/endpoint.sh analyze_image '{"image_data": "base64...", "query": "What is in this image?"}'
+
+# Test Whisper audio transcription
+./scripts/endpoint.sh transcribe_url '{"url": "https://plufz.com/test-assets/test-english.mp3"}'
+
+# Use custom host/port and verbose output
+./scripts/endpoint.sh health '{}' --host localhost --port 3001 --verbose
+
+# Get help with available endpoints
+./scripts/endpoint.sh --help
+
 ## 📚 Complete Documentation
 
 **📖 [Full Documentation in `docs/`](docs/README.md)**

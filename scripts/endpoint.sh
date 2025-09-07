@@ -32,7 +32,7 @@ show_usage() {
     echo "  $0 hello '{\"name\": \"World\"}'"
     echo "  $0 generate_image '{\"prompt\": \"A beautiful sunset\", \"width\": 512, \"height\": 512}'"
     echo "  $0 analyze_image '{\"image_data\": \"base64...\", \"query\": \"What is in this image?\"}'"
-    echo "  $0 transcribe_url '{\"url\": \"https://example.com/audio.mp3\"}'"
+    echo "  $0 transcribe_url '{\"url\": \"https://plufz.com/test-assets/test-english.mp3\"}'"
     echo ""
     echo "Options:"
     echo "  --host <host>     Server host (default: ${DEFAULT_HOST})"

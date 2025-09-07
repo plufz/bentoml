@@ -71,7 +71,7 @@ Use the endpoint testing script for interactive API testing:
 ./scripts/endpoint.sh analyze_image '{"image_data": "base64...", "query": "What is in this image?"}'
 
 # Test Whisper audio transcription
-./scripts/endpoint.sh transcribe_url '{"url": "https://example.com/audio.mp3"}'
+./scripts/endpoint.sh transcribe_url '{"url": "https://plufz.com/test-assets/test-english.mp3"}'
 
 # Use custom host/port and verbose output
 ./scripts/endpoint.sh health '{}' --host localhost --port 3001 --verbose

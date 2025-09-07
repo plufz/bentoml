@@ -32,8 +32,8 @@ class TestWhisperServiceUnit:
         from pydantic import ValidationError
         
         # Test valid URL
-        request = TranscribeUrlRequest(url="https://example.com/audio.mp3")
-        assert str(request.url) == "https://example.com/audio.mp3"
+        request = TranscribeUrlRequest(url="https://plufz.com/test-assets/test-english.mp3")
+        assert str(request.url) == "https://plufz.com/test-assets/test-english.mp3"
         
         # Test invalid URL
         with pytest.raises(ValidationError):
@@ -165,7 +165,7 @@ class TestWhisperServiceUnit:
             mock_file.name = "/tmp/downloaded_audio.mp3"
             mock_temp.return_value.__enter__.return_value = mock_file
             
-            result = service._download_url("https://example.com/audio.mp3")
+            result = service._download_url("https://plufz.com/test-assets/test-english.mp3")
             
             assert result == "/tmp/downloaded_audio.mp3"
             mock_file.write.assert_called_once_with(b"audio_content_here")
@@ -296,7 +296,7 @@ class TestWhisperServiceBehavior:
         mock_post.return_value = mock_response
         
         response = requests.post("http://test/transcribe_url", json={
-            "url": "https://example.com/audio.mp3"
+            "url": "https://plufz.com/test-assets/test-english.mp3"
         })
         
         assert response.status_code == 200
