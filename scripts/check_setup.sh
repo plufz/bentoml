@@ -15,7 +15,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-CONFIG_FILE="bentoml_config.yaml"
+CONFIG_FILE="config/bentoml.yaml"
 
 echo -e "${GREEN}🔍 BentoML Setup Verification with UV${NC}"
 echo "=================================="

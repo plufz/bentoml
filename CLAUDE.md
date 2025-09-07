@@ -16,12 +16,14 @@ This is a BentoML local development setup configured to run on macOS without Doc
 - `scripts/check_setup.sh` - Verifies installation and configuration
 - `scripts/test_service.sh` - Automated testing script
 - `pyproject.toml` - UV project configuration with dependencies  
-- `bentoml_config.yaml` - BentoML server configuration
+- `config/bentoml.yaml` - BentoML server configuration
+- `config/bentofiles/` - Service-specific Bento build configurations
 - `services/example_service.py` - Example service using modern BentoML API
 - `services/stable_diffusion_service.py` - Stable Diffusion image generation service
 - `services/llava_service.py` - LLaVA vision-language service using llama-cpp-python
+- `services/whisper_service.py` - Whisper audio transcription service
 - `scripts/test_llava.sh` - LLaVA service testing script
-- `bentofile_sd.yaml` - Configuration for Stable Diffusion service
+- `scripts/test_whisper.sh` - Whisper service testing script
 
 ## Development Workflow
 
@@ -53,7 +55,9 @@ Build services into Bento packages:
 ./scripts/run_bentoml.sh build services/service_name.py
 
 # Build with custom bentofile
-BENTOFILE=bentofile_custom.yaml ./scripts/run_bentoml.sh build services/service_name.py
+BENTOFILE=config/bentofiles/stable-diffusion.yaml ./scripts/run_bentoml.sh build services/stable_diffusion_service.py
+BENTOFILE=config/bentofiles/whisper.yaml ./scripts/run_bentoml.sh build services/whisper_service.py
+BENTOFILE=config/bentofiles/llava.yaml ./scripts/run_bentoml.sh build services/llava_service.py
 ```
 
 ### Testing Services
@@ -203,5 +207,5 @@ For commit attribution, use only: "Generated with Claude"
 
 - UV is installed via official installer (curl method)
 - Scripts include PATH setup automatically - no manual export needed
-- Services built with `bentofile.yaml` configuration
+- Services built with organized configuration files in `config/bentofiles/`
 - Modern Pydantic-based API (no deprecated `bentoml.io` imports)

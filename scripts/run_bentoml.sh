@@ -16,7 +16,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-CONFIG_FILE="bentoml_config.yaml"
+CONFIG_FILE="config/bentoml.yaml"
 ENV_FILE=".env"
 
 echo -e "${GREEN}🚀 Starting BentoML Local Server with UV${NC}"

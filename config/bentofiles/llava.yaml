@@ -1,0 +1,10 @@
+service: "services.llava_service:LLaVAService"
+labels:
+  owner: bentoml-local-setup
+  stage: dev
+  type: vision-language
+include:
+  - "services/"
+  - "utils/"
+python:
+  requirements_txt: "./requirements.txt"
