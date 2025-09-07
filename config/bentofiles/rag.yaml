@@ -1,0 +1,71 @@
+service: "services.rag_service:RAGService"
+labels:
+  owner: bentoml-team
+  stage: development
+  task: "rag"
+description: "Complete RAG (Retrieval-Augmented Generation) service with document ingestion and query capabilities using sentence-transformers, Milvus, and llama-cpp"
+
+include:
+- "services/rag_service.py"
+- "services/rag_embedding_service.py"
+- "services/rag_llm_service.py"
+- "config/"
+- "*.py"
+- "*.md"
+- "*.txt"
+- "*.yaml"
+- "*.yml"
+
+exclude:
+- "tests/"
+- "*.pytest_cache"
+- "__pycache__/"
+- "*.pyc"
+- "*.pyo"
+- ".git/"
+- ".venv/"
+- "htmlcov/"
+- "endpoint_images/"
+- "storage/"
+- "models/"
+- "*.coverage.*"
+
+python:
+  requirements_txt: |
+    bentoml[io]>=1.2.0
+    pandas>=1.5.0
+    numpy>=1.21.0
+    scikit-learn>=1.0.0
+    fastapi>=0.100.0
+    uvicorn[standard]>=0.20.0
+    pydantic>=2.0.0
+    jsonschema>=4.0.0
+    llama-cpp-python>=0.2.0
+    requests>=2.28.0
+    orjson>=3.8.0
+    llama-index-core>=0.10.0
+    llama-index-vector-stores-milvus>=0.1.0
+    llama-index-embeddings-huggingface>=0.2.0
+    llama-index-llms-llama-cpp>=0.1.0
+    sentence-transformers>=2.2.0
+    pymilvus>=2.3.0
+    pypdf>=3.0.0
+    transformers>=4.25.0
+    torch>=2.0.0
+    pillow>=9.0.0
+  lock_packages: true
+
+docker:
+  distro: debian
+  system_packages:
+  - git
+  - build-essential
+  - cmake
+  - pkg-config
+  python_version: "3.11"
+  cuda_version: null  # Use CPU only for better compatibility
+
+models:
+- tag: sentence-transformers/all-MiniLM-L6-v2
+- tag: microsoft/Phi-3-mini-4k-instruct-gguf
+  filter: "*.gguf"
