@@ -86,8 +86,9 @@ Use the endpoint testing script for interactive API testing:
 # Test Whisper audio transcription from URL
 ./scripts/endpoint.sh transcribe_url '{"url": "https://plufz.com/test-assets/test-english.mp3"}'
 
-# Test Whisper audio transcription from file
-./scripts/endpoint.sh transcribe_file '{"file": "./test-assets/test-english.mp3"}'
+# Test Whisper audio transcription from file (requires curl for file upload)
+curl -X POST http://127.0.0.1:3000/transcribe_file \
+  -F "audio_file=@./test-assets/test-english.mp3"
 
 # Use custom host/port and verbose output
 ./scripts/endpoint.sh health '{}' --host localhost --port 3001 --verbose
