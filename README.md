@@ -8,6 +8,7 @@
 - **👁️ LLaVA Vision Service** - Analyze images with structured JSON output
 - **🎯 Whisper Audio Service** - Transcribe audio files and URLs
 - **📸 Photo Upscaler Service** - AI-powered photo upscaling with Real-ESRGAN
+- **🧠 RAG Service** - Document ingestion and question-answering with retrieval-augmented generation
 - **⚡ Apple Silicon Optimized** - MPS acceleration for M1/M2/M3 Macs
 - **📦 UV Package Management** - Lightning-fast dependency resolution
 - **🔧 Zero Docker Required** - Pure Python with BentoML 1.4+
@@ -62,6 +63,7 @@ The service will automatically start on boot and restart if it crashes.
 | **LLaVA Vision** | Image + Text → JSON analysis | `BENTOFILE=config/bentofiles/llava.yaml ./scripts/run_bentoml.sh build services/llava_service.py` |
 | **Whisper Audio** | Audio → Text transcription | `BENTOFILE=config/bentofiles/whisper.yaml ./scripts/run_bentoml.sh build services/whisper_service.py` |
 | **Photo Upscaler** | Image → AI upscaled image | `BENTOFILE=config/bentofiles/upscaler.yaml ./scripts/run_bentoml.sh build services/upscaler_service.py` |
+| **RAG Service** | Document ingestion + Q&A | `BENTOFILE=config/bentofiles/rag.yaml ./scripts/run_bentoml.sh build services/rag_service.py` |
 | **Example** | Simple API for testing | `./scripts/run_bentoml.sh build services/example_service.py` |
 
 ### Testing Endpoints
@@ -102,6 +104,12 @@ curl -X POST http://127.0.0.1:3000/upscale_file \
   -F "image_file=@./test-assets/test-upscale.jpg" \
   -F "scale_factor=2.5" \
   -F "output_format=PNG"
+
+# Test RAG document ingestion (text)
+./scripts/endpoint.sh rag_ingest_text '{"text": "This is a test document about AI.", "metadata": {"source": "test"}}'
+
+# Test RAG query
+./scripts/endpoint.sh rag_query '{"query": "What is AI?", "max_tokens": 512}'
 
 # Use custom host/port and verbose output
 ./scripts/endpoint.sh health '{}' --host localhost --port 3001 --verbose

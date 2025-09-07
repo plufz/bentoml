@@ -27,6 +27,7 @@ This is a BentoML local development setup configured to run on macOS without Doc
 - `services/llava_service.py` - LLaVA vision-language service using llama-cpp-python
 - `services/whisper_service.py` - Whisper audio transcription service
 - `services/upscaler_service.py` - Photo upscaler service using Real-ESRGAN
+- `services/rag_service.py` - RAG (Retrieval-Augmented Generation) service with document ingestion and query capabilities
 - `services/multi_service.py` - Multi-service composition with unified endpoints
 
 ## Development Workflow
@@ -87,6 +88,23 @@ curl -X POST http://127.0.0.1:3000/upscale_file \
   -F "scale_factor=2.5" \
   -F "output_format=PNG"
 
+# Test RAG document ingestion (text)
+./scripts/endpoint.sh rag_ingest_text '{"text": "This is a test document about AI and machine learning.", "metadata": {"source": "test"}}'
+
+# Test RAG document ingestion from PDF file (requires curl for file upload)
+curl -X POST http://127.0.0.1:3000/rag_ingest_pdf \
+  -F "pdf_file=@./test-assets/sample.pdf"
+
+# Test RAG document ingestion from text file (requires curl for file upload)
+curl -X POST http://127.0.0.1:3000/rag_ingest_txt_file \
+  -F "txt_file=@./test-assets/sample.txt"
+
+# Test RAG query
+./scripts/endpoint.sh rag_query '{"query": "What is machine learning?", "max_tokens": 512, "temperature": 0.1}'
+
+# Clear RAG index
+./scripts/endpoint.sh rag_clear_index '{}'
+
 # Use custom host/port and verbose output
 ./scripts/endpoint.sh health '{}' --host localhost --port 3001 --verbose
 
@@ -114,6 +132,9 @@ Services are served using the module path format:
 # Photo Upscaler service
 ./scripts/run_bentoml.sh serve services.upscaler_service:PhotoUpscalerService
 
+# RAG service
+./scripts/run_bentoml.sh serve services.rag_service:RAGService
+
 # Example service
 ./scripts/run_bentoml.sh serve services.example_service:ExampleService
 ```
@@ -130,6 +151,7 @@ BENTOFILE=config/bentofiles/stable-diffusion.yaml ./scripts/run_bentoml.sh build
 BENTOFILE=config/bentofiles/whisper.yaml ./scripts/run_bentoml.sh build services/whisper_service.py
 BENTOFILE=config/bentofiles/llava.yaml ./scripts/run_bentoml.sh build services/llava_service.py
 BENTOFILE=config/bentofiles/upscaler.yaml ./scripts/run_bentoml.sh build services/upscaler_service.py
+BENTOFILE=config/bentofiles/rag.yaml ./scripts/run_bentoml.sh build services/rag_service.py
 ```
 
 ### Multi-Service Architecture
@@ -150,8 +172,9 @@ BENTOFILE=config/bentofiles/multi-service.yaml ./scripts/run_bentoml.sh serve se
 - LLaVA: `/analyze_image`, `/analyze_image_url`, `/example_schemas`
 - Whisper: `/transcribe_file`, `/transcribe_url`
 - Photo Upscaler: `/upscale_file`, `/upscale_url`
+- RAG Service: `/rag_ingest_text`, `/rag_ingest_pdf`, `/rag_ingest_txt_file`, `/rag_query`, `/rag_clear_index`
 
-**Total: 12 endpoints in a single service** 🚀
+**Total: 17 endpoints in a single service** 🚀
 
 ### Testing Services
 
@@ -159,6 +182,7 @@ Test individual services with pytest:
 ```bash
 ./scripts/test.sh --service llava        # Test LLaVA service
 ./scripts/test.sh --service upscaler     # Test Photo Upscaler service  
+./scripts/test.sh --service rag          # Test RAG service
 ./scripts/test.sh --service multi        # Test all services in multi-service
 ```
 
@@ -214,6 +238,13 @@ Core dependencies managed by UV:
 - `jsonschema>=4.17.0` - JSON schema validation
 - `realesrgan>=0.3.0` - Real-ESRGAN AI upscaling models
 - `gfpgan>=1.3.8` - GFPGAN face enhancement for photo upscaling
+- `llama-index-core>=0.10.0` - LlamaIndex core for RAG applications
+- `llama-index-vector-stores-milvus>=0.1.0` - Milvus vector store integration
+- `llama-index-embeddings-huggingface>=0.2.0` - HuggingFace embeddings for LlamaIndex
+- `llama-index-llms-llama-cpp>=0.1.0` - llama-cpp integration for LlamaIndex
+- `sentence-transformers>=2.2.0` - Sentence transformer models for embeddings
+- `pymilvus>=2.3.0` - Milvus vector database client
+- `pypdf>=3.0.0` - PDF processing for document ingestion
 - `vllm>=0.3.0` - High-performance LLM serving (optional)
 - `openai>=1.0.0` - OpenAI API client (for examples)
 - `requests>=2.28.0` - HTTP client library
