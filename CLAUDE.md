@@ -39,14 +39,31 @@ This is a BentoML local development setup configured to run on macOS without Doc
 5. **Health Check**: Use `./scripts/health.sh` to check service health
 6. **Test**: Use service-specific test scripts for automated testing
 
-### Quick Start Scripts
+### Enhanced Quick Start Scripts
 
-For convenience, use these scripts for common operations:
+All scripts now feature configuration-driven operation with comprehensive help and listing capabilities:
+
 ```bash
-./scripts/start.sh           # Start the multi-service 
-./scripts/build_services.sh  # Build all services
-./scripts/health.sh          # Check health of running service
+# Build Services (Configuration-Driven)
+./scripts/build_services.sh              # Build all services
+./scripts/build_services.sh rag llava    # Build specific services  
+./scripts/build_services.sh --list       # List available services
+./scripts/build_services.sh --help       # Show comprehensive help
+
+# Endpoint Testing (Dynamic Discovery)
 ./scripts/endpoint.sh <endpoint> <json>  # Test any endpoint
+./scripts/endpoint.sh --list             # List all available endpoints with examples
+./scripts/endpoint.sh --help             # Show usage and available endpoints
+
+# Testing (Enhanced Service Selection)
+./scripts/test.sh                        # Run fast tests
+./scripts/test.sh --service rag          # Test specific service
+./scripts/test.sh --list                 # List available test services and types
+./scripts/test.sh --help                 # Show testing options
+
+# Other Operations
+./scripts/start.sh                       # Start the multi-service 
+./scripts/health.sh                      # Check health of running service
 ```
 
 ### Testing Endpoints
@@ -154,6 +171,46 @@ BENTOFILE=config/bentofiles/upscaler.yaml ./scripts/run_bentoml.sh build service
 BENTOFILE=config/bentofiles/rag.yaml ./scripts/run_bentoml.sh build services/rag_service.py
 ```
 
+## Configuration-Driven Architecture
+
+The build and testing scripts now use a configuration-driven approach to eliminate code duplication and improve maintainability:
+
+### Configuration Files
+
+- **`scripts/services-config.json`** - Centralized service build configuration
+  - Service names, file paths, and bentofile associations
+  - Descriptions and metadata for each service
+  - Single source of truth for service definitions
+
+- **`scripts/endpoints-config.json`** - Comprehensive endpoint documentation
+  - System and service endpoint definitions
+  - Example payloads and descriptions
+  - Image endpoint detection for automatic processing
+  - Multipart file upload specifications
+
+- **`scripts/tests-config.json`** - Test service and type configurations
+  - Service-to-test-file mappings with aliases (e.g., `sd` → `stable_diffusion`)
+  - Test type definitions with pytest markers
+  - Coverage and pytest option configurations
+
+### Benefits
+
+✅ **Maintainable**: Add new services by editing JSON configuration only  
+✅ **Consistent**: Automated help generation ensures documentation stays current  
+✅ **Scalable**: Scripts handle unlimited services without code changes  
+✅ **Error-Resistant**: Comprehensive validation and fallback support  
+✅ **User-Friendly**: Rich help systems with `--help` and `--list` options
+
+### Adding New Services
+
+To add a new service to the system:
+
+1. **Add service definition** to `scripts/services-config.json`
+2. **Add endpoint definitions** to `scripts/endpoints-config.json` 
+3. **Add test configuration** to `scripts/tests-config.json`
+
+No script modifications required - all functionality is automatically available!
+
 ### Multi-Service Architecture
 
 For unified deployment, use the multi-service composition:
@@ -176,14 +233,35 @@ BENTOFILE=config/bentofiles/multi-service.yaml ./scripts/run_bentoml.sh serve se
 
 **Total: 17 endpoints in a single service** 🚀
 
-### Testing Services
+### Enhanced Testing Services
 
-Test individual services with pytest:
+Configuration-driven testing with comprehensive options:
+
 ```bash
-./scripts/test.sh --service llava        # Test LLaVA service
-./scripts/test.sh --service upscaler     # Test Photo Upscaler service  
+# Basic Testing Options
+./scripts/test.sh                        # Fast tests only (unit + behavior)
+./scripts/test.sh --all                  # All tests including slow integration
+./scripts/test.sh --coverage             # Fast tests with coverage report
+./scripts/test.sh --coverage-all         # All tests with coverage
+
+# Service-Specific Testing
+./scripts/test.sh --service example      # Test Example service
+./scripts/test.sh --service llava        # Test LLaVA service  
 ./scripts/test.sh --service rag          # Test RAG service
-./scripts/test.sh --service multi        # Test all services in multi-service
+./scripts/test.sh --service sd           # Test Stable Diffusion (alias support)
+./scripts/test.sh --service multi        # Test multi-service composition
+
+# Test Type Filtering
+./scripts/test.sh --unit                 # Unit tests only
+./scripts/test.sh --behavior             # HTTP behavior tests only
+./scripts/test.sh --integration          # Integration tests only (slow)
+
+# Discovery and Help
+./scripts/test.sh --list                 # List all available services and test types
+./scripts/test.sh --help                 # Show comprehensive testing options
+
+# Combined Options
+./scripts/test.sh --service rag --coverage --verbose  # RAG tests with coverage and verbose output
 ```
 
 ## BentoML Service Pattern

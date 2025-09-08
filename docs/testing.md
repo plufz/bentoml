@@ -1,34 +1,55 @@
 # Testing Guide
 
-Comprehensive testing approaches for all BentoML services.
+Comprehensive testing approaches for all BentoML services with enhanced configuration-driven capabilities.
 
 ## Overview
 
-This project includes multiple testing approaches:
-- **Automated scripts** for quick validation
-- **Manual curl commands** for detailed testing
-- **Interactive Swagger UI** for exploration
-- **Load testing** for performance validation
+This project provides multiple testing approaches:
+- **Configuration-driven automated testing** with pytest
+- **Dynamic endpoint discovery and testing**  
+- **Service-specific test suites** with comprehensive coverage
+- **Interactive API exploration** with generated examples
 
-## Test Scripts
+## 🚀 Enhanced Test Scripts (Recommended)
 
-### General Service Testing
+### Configuration-Driven Testing
 ```bash
-# Test any running service
-./scripts/test_service.sh test        # Basic health + endpoint test
-./scripts/test_service.sh load 20     # Load test with 20 requests
+# List all available test services and types
+./scripts/test.sh --list
+
+# Run tests for specific services  
+./scripts/test.sh --service rag         # RAG service tests
+./scripts/test.sh --service llava       # LLaVA service tests
+./scripts/test.sh --service sd          # Stable Diffusion (alias support)
+./scripts/test.sh --service multi       # Multi-service composition tests
+
+# Run specific test types
+./scripts/test.sh --unit                # Fast unit tests
+./scripts/test.sh --behavior            # HTTP behavior tests  
+./scripts/test.sh --integration         # Full integration tests (slow)
+
+# Coverage and reporting
+./scripts/test.sh --coverage            # Fast tests with coverage
+./scripts/test.sh --coverage-all        # All tests with coverage
+./scripts/test.sh --service rag --coverage --verbose  # Combined options
+
+# Basic testing (default)
+./scripts/test.sh                       # Run fast tests (unit + behavior)
+./scripts/test.sh --all                 # Run all tests including integration
 ```
 
-### LLaVA Service Testing
+### Dynamic Endpoint Testing
 ```bash
-# All LLaVA tests
-./scripts/test_llava.sh all
+# List all available endpoints with examples
+./scripts/endpoint.sh --list
 
-# Individual tests
-./scripts/test_llava.sh health         # Health check
-./scripts/test_llava.sh schemas        # Get example schemas
-./scripts/test_llava.sh image          # Basic image analysis
-./scripts/test_llava.sh json           # Structured JSON output
+# Test endpoints with auto-generated examples
+./scripts/endpoint.sh health '{}'
+./scripts/endpoint.sh rag_query '{"query": "What is machine learning?", "max_tokens": 256}'
+./scripts/endpoint.sh generate_image '{"prompt": "A sunset", "width": 512, "height": 512}'
+
+# Get help and usage examples
+./scripts/endpoint.sh --help
 ```
 
 ## Manual Testing

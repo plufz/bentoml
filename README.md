@@ -57,36 +57,70 @@ The service will automatically start on boot and restart if it crashes.
 
 ## 🎯 Available Services
 
-| Service | What it does | Build & Serve |
-|---------|-------------|---------------|
-| **Stable Diffusion** | Text → Image generation | `BENTOFILE=config/bentofiles/stable-diffusion.yaml ./scripts/run_bentoml.sh build services/stable_diffusion_service.py` |
-| **LLaVA Vision** | Image + Text → JSON analysis | `BENTOFILE=config/bentofiles/llava.yaml ./scripts/run_bentoml.sh build services/llava_service.py` |
-| **Whisper Audio** | Audio → Text transcription | `BENTOFILE=config/bentofiles/whisper.yaml ./scripts/run_bentoml.sh build services/whisper_service.py` |
-| **Photo Upscaler** | Image → AI upscaled image | `BENTOFILE=config/bentofiles/upscaler.yaml ./scripts/run_bentoml.sh build services/upscaler_service.py` |
-| **RAG Service** | Document ingestion + Q&A | `BENTOFILE=config/bentofiles/rag.yaml ./scripts/run_bentoml.sh build services/rag_service.py` |
-| **Example** | Simple API for testing | `./scripts/run_bentoml.sh build services/example_service.py` |
+| Service | What it does | Quick Build & Test |
+|---------|-------------|-------------------|
+| **Stable Diffusion** | Text → Image generation | `./scripts/build_services.sh stable-diffusion` |
+| **LLaVA Vision** | Image + Text → JSON analysis | `./scripts/build_services.sh llava` |
+| **Whisper Audio** | Audio → Text transcription | `./scripts/build_services.sh whisper` |
+| **Photo Upscaler** | Image → AI upscaled image | `./scripts/build_services.sh upscaler` |
+| **RAG Service** | Document ingestion + Q&A | `./scripts/build_services.sh rag` |
+| **Example** | Simple API for testing | `./scripts/build_services.sh example` |
+| **Multi-Service** | All services unified | `./scripts/build_services.sh multi-service` |
 
-### Testing Endpoints
+### 🚀 Enhanced Build System
 
-Use the endpoint testing script for interactive API testing:
+Configuration-driven scripts with comprehensive help and discovery:
 
 ```bash
-# Test health check
+# Build all services
+./scripts/build_services.sh
+
+# Build specific services  
+./scripts/build_services.sh rag llava whisper
+
+# List available services
+./scripts/build_services.sh --list
+
+# Show detailed help
+./scripts/build_services.sh --help
+```
+
+### 🧪 Enhanced Testing & Discovery
+
+**Endpoint Testing with Dynamic Discovery:**
+```bash
+# List all available endpoints with examples
+./scripts/endpoint.sh --list
+
+# Test any endpoint with automatic help
 ./scripts/endpoint.sh health '{}'
-
-# Test hello service with custom name
 ./scripts/endpoint.sh hello '{"name": "BentoML"}'
+./scripts/endpoint.sh rag_query '{"query": "What is AI?", "max_tokens": 256}'
 
-# Test with empty payload (uses defaults)
-./scripts/endpoint.sh hello '{}'
+# Get endpoint help and examples
+./scripts/endpoint.sh --help
+```
 
-# Test Stable Diffusion image generation
-./scripts/endpoint.sh generate_image '{"prompt": "A beautiful sunset", "width": 512, "height": 512}'
+**Comprehensive Test Suite:**
+```bash
+# List available test services and types
+./scripts/test.sh --list
 
-# Test LLaVA image analysis (base64/bytes)
-./scripts/endpoint.sh analyze_image '{"image": "base64...", "prompt": "What is in this image?"}'
+# Run tests for specific services
+./scripts/test.sh --service rag         # RAG service tests
+./scripts/test.sh --service sd          # Stable Diffusion tests (alias support)
+./scripts/test.sh --service multi       # Multi-service tests
 
-# Test LLaVA image analysis from URL
+# Run specific test types
+./scripts/test.sh --unit                # Fast unit tests
+./scripts/test.sh --integration         # Full integration tests
+./scripts/test.sh --coverage            # Tests with coverage report
+
+# Get testing help
+./scripts/test.sh --help
+```
+
+**Quick Endpoint Examples:**
 ./scripts/endpoint.sh analyze_image_url '{"image_url": "https://plufz.com/test-assets/test-office.jpg", "prompt": "What is in this image?"}'
 
 # Test Whisper audio transcription from URL
